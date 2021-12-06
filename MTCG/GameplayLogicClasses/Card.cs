@@ -15,12 +15,15 @@ namespace MTCG.GameplayLogicClasses
         public element Element { get; }
         public int Damage {get;}
 
+        public Card(element _Element,int _Damage)
+        {
+            this.Element = _Element;
+            this.Damage = _Damage;
+        }
 
         public abstract string GetName();
-        public virtual int GetDamage(Card Enemy)
-        {
-            return this.Damage;
-        }
+        public abstract int GetDamage(Card Enemy);
+
         
         
     }

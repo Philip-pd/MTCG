@@ -11,7 +11,7 @@ namespace MTCG.SystemLogicClasses
         public int Elo { get; }
         public int Money { get; set; }
         public int[] Deck { get; } = new int[4]; //4-8 are for battle logic and will be done there
-        public int[] Collection { get; set; } = new int[50]; //set to currently available cards
+        public int[] Collection { get; set; } = new int[30]; //set to currently available cards
 
         public Player(string name, string pass)
         {
@@ -20,7 +20,7 @@ namespace MTCG.SystemLogicClasses
             this.Elo = 1000;
             this.Money = 25;
             this.Deck[0] = -1;
-            this.Collection[0] = 1;
+      //      this.Collection[0] = 1;  ??? Plan?
         }
         public void PrintData()
         {

@@ -1,27 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 
 namespace MTCG.SystemLogicClasses
 {
     public class Player
     {
-        private string Name;
+        
         private string Password;
+        public string Name { get; }
         public int Elo { get; }
         public int Money { get; set; }
         public int[] Deck { get; } = new int[4]; //4-8 are for battle logic and will be done there
-        public int[] Collection { get; set; } = new int[30]; //set to currently available cards
+        public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards
 
-        public Player(string name, string pass)
+        public Player(string name, string pass,int elo,int money,int collection)
         {
             this.Name = name;
             this.Password = pass;
-            this.Elo = 1000;
-            this.Money = 25;
-            this.Deck[0] = -1;
-      //      this.Collection[0] = 1;  ??? Plan?
+            this.Elo = elo; //1000 default
+            this.Money = money; //25 default
+            this.Deck[0] = -1; //to be set before you play
+            CollectionDecr(collection); //integer
+            
         }
+        private void CollectionDecr(int number)
+        {
+            BitArray b = new BitArray(new int[] { number});
+            
+            b.CopyTo(this.Collection, 0);
+        }
+
+
+        public int GetCollectionInt()
+        {
+            BitArray ColBits = new BitArray(this.Collection);
+
+            int[] array = new int[1];
+            ColBits.CopyTo(array, 0);
+            return array[0];
+
+        }
+
+
         public void PrintData()
         {
             Console.WriteLine("Data:  Name: " + this.Name +
@@ -30,7 +52,7 @@ namespace MTCG.SystemLogicClasses
 
         }
 
-        public void CreateDeck(int[] ar)
+        public void CreateDeck(int[] ar) 
         {
             for (int i = 0; i < 4; i++)
             {
@@ -42,11 +64,11 @@ namespace MTCG.SystemLogicClasses
 
         private void ValidateDeck() //call whenever make new Deck
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) //works //should check for doubles or don't but do that later if at all
             {
                 try
                 {
-                    if (this.Collection[this.Deck[i]] == 0)
+                    if (this.Collection[this.Deck[i]] == false)
                     {
                         this.Deck[0] = -1;
                         return;

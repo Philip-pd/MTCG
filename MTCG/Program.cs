@@ -8,9 +8,9 @@ namespace MTCG
     {
         static void Main(string[] args)//Basically just for testing until we get REST
         {
-            Player a = new Player("p1", "123");
-            Player b = new Player("p2", "129");
-            int[] ar = { 0, 1, 1, 3 };
+            Player a = new Player("p1", "123",1000,25,255);
+            Player b = new Player("p2", "129", 1000, 25, 255);
+            int[] ar = { 0, 1, 2, 3 };
             a.CreateDeck(ar);
             b.CreateDeck(ar);
             a.PrintData();
@@ -21,6 +21,37 @@ namespace MTCG
             a.PrintData();
             b.PrintData();
 
+
+            /*
+             * Todo:
+             * 
+             * Gameplay Logic:
+             * 
+             *  Elo System: Build Base one now do complex later  3
+             *  
+             *  Dictionary for Weakness 4
+             * 
+             * System Logic:
+             * 
+             *  DataBase 1
+             *  
+             *      Profile
+             *  
+             *      Ranking
+             *      
+             *          Create User (in MM)
+             *  
+             *  Packs 2
+             *  
+             *  Trading 2
+             *  
+             *  Rest 1.2
+             *  
+             *      MatchMaking
+             *  
+             *      Multithread
+             * 
+             */
         }
     }
 }

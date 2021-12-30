@@ -40,8 +40,10 @@ namespace MTCG
              *      Ranking
              *      
              *          Create User (in MM)
-             *  
-             *  Packs 2
+             *          or
+             *          Create user on login and then use token of (sha256 of password + username + sha256 of password) as Identifier of User
+             *          so the SQL don't break
+             *       Packs 2
              *  
              *  Trading 2
              *  

@@ -8,8 +8,9 @@ namespace MTCG.SystemLogicClasses
     public class Player
     {
         
-        private string Password;
+        public int ID { get; }
         public string Name { get; }
+        public string Password { get; }
         public int Elo { get; }
         public int Money { get; set; }
         public int[] Deck { get; } = new int[4]; //4-8 are for battle logic and will be done there
@@ -92,10 +93,10 @@ namespace MTCG.SystemLogicClasses
          * 
          * Can:
          * 
-         * Open Packs
-         * Trade
-         * Make Friends (only in DB)
-         * Battle
+         * Open Packs N
+         * Trade N
+         * Make Friends (only in DB) ?
+         * Battle Y
          */
 
     }

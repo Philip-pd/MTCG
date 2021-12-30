@@ -77,11 +77,6 @@ namespace MTCG.SystemLogicClasses
             Console.WriteLine("Game ended in a Draw");
             //Update Elo
             //player with 0 cards loose elo other one gain
-            //Call Round 3 times
-            //Card needs to be defeated somehow use bool to check
-            //Update Elo after all rounds
-            //maybe gen random here and send ints to round (1-4 send their value over if not empty deck & retry if empty) Empty after selection
-            //Alternativeley randomize deck order and then just iterate over them. whatever will be easier
         }
         private char Round(int A, int B) //can't mark defeated cards cause out of scope
         {
@@ -105,13 +100,6 @@ namespace MTCG.SystemLogicClasses
             }
 
             
-        }
-        private bool Combat()
-        {
-            //kinda nonsense
-            //Play out Battle logic
-            //return 0 or 1 depending on who won
-            return true;
         }
         private int[] DeckSort(int[] arr1) //Array has Var Length
         {

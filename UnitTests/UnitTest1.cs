@@ -13,14 +13,41 @@ namespace UnitTests
         {
 
         }
+        [Test]
+        public void CollectionHashWorks()
+        {
+            Player a = new Player("p1", "123", 1000, 25, 0);
+            for(int i=0;i<=30;i++)
+            {
+                a.Collection[i] = true;
+            }
+            Player b = new Player("p1", "123", 1000, 25, 2147483647);
+            Assert.AreEqual(a.GetCollectionInt(), b.GetCollectionInt());
+        }
 
         [Test]
-        public void SpotsInvalidDeck()
+        public void SpotsInvalidDeckNoCollection()
         {
             Player a = new Player("p1", "123", 1000, 25, 0);
             int[] ar = { 0, 1, 1, 3 };
             a.CreateDeck(ar);
             Assert.AreEqual(a.Deck[0], -1);
+        }
+        [Test]
+        public void SpotsInvalidDeckMultiples()
+        {
+            Player a = new Player("p1", "123", 1000, 25, 255);
+            int[] ar = { 0, 1, 1, 3 };
+            a.CreateDeck(ar);
+            Assert.AreEqual(a.Deck[0], -1);
+        }
+        [Test]
+        public void ValidatesDeck()
+        {
+            Player a = new Player("p1", "123", 1000, 25, 255);
+            int[] ar = { 0, 1, 2, 3 };
+            a.CreateDeck(ar);
+            Assert.AreEqual(a.Deck[0], 0);
         }
         [Test]
         public void FactoryTestMonsters()
@@ -41,7 +68,7 @@ namespace UnitTests
             Assert.AreEqual(NSpell.GetName(), "NormalSpell");
         }
         [Test]
-        public void GetsRightWinner()
+        public void GetsRightWinner() //rework or remove cause it will no longer work
         {
 
 
@@ -57,5 +84,6 @@ namespace UnitTests
             Assert.Pass();//replace with player 2 elo higher player 1 elo lower 
 
         }
+        
     }
 }

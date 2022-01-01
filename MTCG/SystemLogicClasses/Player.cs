@@ -8,13 +8,12 @@ namespace MTCG.SystemLogicClasses
     public class Player
     {
         
-        public int ID { get; }
         public string Name { get; }
         public string Password { get; }
         public int Elo { get; }
         public int Money { get; set; }
-        public int[] Deck { get; } = new int[4]; //4-8 are for battle logic and will be done there
-        public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards
+        public int[] Deck { get; } = new int[4]; //5-7 only needed for battle logic
+        public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards (only need 30 but no int with 30 bit) 
 
         public Player(string name, string pass,int elo,int money,int collection)
         {
@@ -45,7 +44,7 @@ namespace MTCG.SystemLogicClasses
         }
 
 
-        public void PrintData()
+        public void PrintData() //instead make so returns Json and put it to client for profile view
         {
             Console.WriteLine("Data:  Name: " + this.Name +
                 " | Password: " + this.Password + " | Elo:" + this.Elo +
@@ -65,14 +64,24 @@ namespace MTCG.SystemLogicClasses
 
         private void ValidateDeck() //call whenever make new Deck
         {
-            for (int i = 0; i < 4; i++) //works //should check for doubles or don't but do that later if at all
+            int[] prev = new int[4]; //only needs to check first 3 but saves headache
+            for (int i = 0; i < 4; i++) //works //should check for doubles
             {
                 try
                 {
-                    if (this.Collection[this.Deck[i]] == false)
+                    prev[i] = this.Deck[i];
+                    if (this.Collection[this.Deck[i]] == false) //checks if you own the cards
                     {
                         this.Deck[0] = -1;
                         return;
+                    }
+                    for(int j=0;j<i;j++)
+                    {
+                        if (this.Deck[i] == prev[j]) //checks if you only used each card once
+                        {
+                            this.Deck[0] = -1;
+                            return;
+                        }
                     }
                 }
                 catch (System.NullReferenceException e)

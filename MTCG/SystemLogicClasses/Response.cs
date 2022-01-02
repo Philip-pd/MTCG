@@ -31,13 +31,23 @@ namespace MTCG.SystemLogicClasses
                 String[] info = request.URL.Split('?', '=', '&'); //Get GET Parametres out of URL
                 switch (info[0]) //Look where it wants to go
                 {
-                    case "/demo":
+                    case "/Demo":
                         System.Threading.Thread.Sleep(10000); //Just to test multithreadedness.
                         return MakeNullRequest(); //400
+                    case "/Ranking": //List of players based on elo
+                        return MakePlayerList();
+                    case "/Player": //?name=name <-- get that also no need to be logged in; 1
+                        return ShowPlayerJSON(info[2]); //?name= info[2]
+                    case "/Collection": //just returns own collection
+                        return MakeOwnCollection(request.parametres[1]); //parameter 1 is token
+                    case "/Trades": //List of all trades that are currently open 3
+                        break;
+                    case "/Packs": //gives Pack info 2
+                        break;
                     default:
                         return MakePageNotFound(); //404
                 }
-
+                return MakePageNotFound(); //remove later
             }
             else if (request.Type == "POST") //POST parametres are in request parametres and URL doesn't need to be edited
             {
@@ -51,14 +61,36 @@ namespace MTCG.SystemLogicClasses
                         if (request.parametres.Length < 4) //if too few parametres
                             return MakeNullRequest();
                         return LoginPlayer(request.parametres[1], request.parametres[3]); //right ones
+                    case "/Trade": //if only 1 param it accepts that trade else it makes its own 3
+                        break;
+                    case "/Pack": //Buys Pack 1
+                        break;
+                    case "/Battle": //Joins MM 4
+                        break;
+                    case "/Logout": //Removes from PlayerOnline
+                        break;
+
                     default:
                         return MakePageNotFound();
                 }
+                return MakePageNotFound(); //remove later
             }
             else
             {
                 return MakeMethodNotAllowed();
             }
+        }
+
+        
+
+        private static Response MakePlayerList()
+        {
+            PlayerDAO dao = new PlayerDAOImpl();
+            List<Player> players = dao.GetAllPlayers();
+            string returntext = JsonConvert.SerializeObject(players, Formatting.Indented);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
         }
 
         //------Good Responses ----------//
@@ -69,6 +101,9 @@ namespace MTCG.SystemLogicClasses
             Player LoggedIn = dao.GetPlayerLogin(name, password);
             if (LoggedIn == null)
                 return ResetContentRequest();
+            PlayerHandler handler = PlayerHandler.Instance;
+            if (!handler.PlayerLogin(LoggedIn))
+                return MakeAlreadyLoggedIn();
             string returntext = LoggedIn.Token;
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
@@ -76,15 +111,27 @@ namespace MTCG.SystemLogicClasses
             //if logged in already return  409 Conflict - This Player is already logged in
         }
 
+        private static Response MakeOwnCollection(string token)
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player player = handler.GetPlayerOnline(token);
+            if (player == null)
+                return NotLoggedIn();
+            string returntext = player.ReturnCollection();
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+
         private static Response MakePlayer(string name, string pwd) //remove just used for tests
         {
             PlayerDAO dao = new PlayerDAOImpl();
             if (name.Length > 32 || pwd.Length > 64 || !dao.AddPlayer(name, pwd))
                 return ResetContentRequest();            
-            return ShowPlayerJSON(name);
+            return ShowNewPlayerJSON(name);
         }
 
-        private static Response ShowPlayerJSON(string name)
+        private static Response ShowNewPlayerJSON(string name)
         {
             PlayerDAO dao = new PlayerDAOImpl();
             Player temp = dao.GetPlayerInfo(name);
@@ -96,9 +143,21 @@ namespace MTCG.SystemLogicClasses
             return new Response("201 Created", "application/json", d);
         }
 
+        private static Response ShowPlayerJSON(string name)
+        {
+            PlayerDAO dao = new PlayerDAOImpl();
+            Player temp = dao.GetPlayerInfo(name);
+            if (temp == null)
+                return MakePageNotFound();
+            string returntext = JsonConvert.SerializeObject(temp);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+
         //----------ERROR CODES-------------//
 
-            private static Response ResetContentRequest() //205
+        private static Response ResetContentRequest() //205
             {
                 string returntext="Invalid Parametres"; //client would then based on context check if entry too long or invalid password
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
@@ -112,6 +171,14 @@ namespace MTCG.SystemLogicClasses
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
                 Byte[] d = enc.GetBytes(returntext);
                 return new Response("400 Bad Request", "text/html", d);
+            }
+            
+            private static Response NotLoggedIn() //403
+            {
+                string returntext = "Login Required"; 
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("403 Forbidden", "text/html", d);
             }
 
             private static Response MakePageNotFound() //404
@@ -128,6 +195,14 @@ namespace MTCG.SystemLogicClasses
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
                 Byte[] d = enc.GetBytes(returntext);
                 return new Response("405 Method Not Allowed", "text/html", d);
+            }
+
+            private static Response MakeAlreadyLoggedIn() //409
+            {
+            string returntext = "Already Logged In";
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("409 Conflict", "text/html", d);
             }
 
         //--Send back to Client--//

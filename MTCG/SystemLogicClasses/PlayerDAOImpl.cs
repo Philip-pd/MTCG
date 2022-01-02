@@ -43,9 +43,23 @@ namespace MTCG.SystemLogicClasses
             command.ExecuteNonQuery();
         }
 
-        public List<Player> GetAllPlayers() //Maybe just return a json instead cause this is mega wasteful
+        public List<Player> GetAllPlayers() //Returns List of All existing players
         {
-            throw new NotImplementedException();
+            List<Player> players = new List<Player>();
+
+            IDbCommand command = Connect();
+            command.CommandText = @"SELECT * FROM players ORDER BY elo DESC";
+            NpgsqlCommand c = command as NpgsqlCommand;
+            c.Prepare();
+            NpgsqlDataReader dr = c.ExecuteReader();
+            while (dr.Read())
+            {
+                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
+                Player toAdd = new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+                players.Add(toAdd);
+            }
+            
+            return players;
         }
 
         public Player GetPlayerInfo(string name) //still gotta do this
@@ -88,8 +102,28 @@ namespace MTCG.SystemLogicClasses
 
         public void UpdatePlayer(Player toUpdate) //update literally every value except name & pwd
         {
-            throw new NotImplementedException();
+            IDbCommand command = Connect();
+            command.CommandText = @"UPDATE players
+                SET coins= @coins,collection=@collection,elo = @elo,win=@win,loss=@loss
+                WHERE name = @name";
+            NpgsqlCommand c = command as NpgsqlCommand;
+            c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Parameters.Add("coins", NpgsqlDbType.Integer);
+            c.Parameters.Add("collection", NpgsqlDbType.Integer);
+            c.Parameters.Add("elo", NpgsqlDbType.Integer);
+            c.Parameters.Add("win", NpgsqlDbType.Integer);
+            c.Parameters.Add("loss", NpgsqlDbType.Integer);
+            c.Prepare();
+            c.Parameters["name"].Value = toUpdate.Name;
+            c.Parameters["coins"].Value = toUpdate.Coins;
+            c.Parameters["collection"].Value = toUpdate.GetCollectionInt();
+            c.Parameters["elo"].Value = toUpdate.Elo;
+            c.Parameters["win"].Value = toUpdate.Wins;
+            c.Parameters["loss"].Value = toUpdate.Losses;
+            command.ExecuteNonQuery();
+
         }
+        //update player deck. add 4 ints for deck in pgsql as well & be like default sets 0 to -1 and rest to 0
 
         public IDbCommand Connect()
         {
@@ -104,19 +138,3 @@ namespace MTCG.SystemLogicClasses
         
     }
 }
-//what should this do before moving on?
-/*
-Create & Delete Player Y
-Update Player Stats N
-
-test them both in program N
-
-then build Rest
-
-Then:
-
-Get all players
-Get specific player to gen for user
-Get specific player for profile view (maybe once getplayer(id) and genplayer(username pwd) )
-
- */

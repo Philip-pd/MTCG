@@ -12,19 +12,20 @@ namespace MTCG.SystemLogicClasses
         public string Name { get; }
         [JsonIgnore]
         public string Token { get; }
-        public int Elo { get; }
-        public int Money { get; set; }
-        public int[] Deck { get; } = new int[4]; //Deck is not tracked by server and needs to be set before playing
+        public int Elo { get; set; }
+        public int Coins { get; set; }
+        public int[] Deck { get; set; } = new int[4]; //Deck is not tracked by server and needs to be set before playing
+        [JsonIgnore]
         public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards (only need 30 but no int with 30 bit) 
-        public int Wins { get; }
-        public int Losses { get; }
+        public int Wins { get; set; }
+        public int Losses { get; set; }
 
-        public Player(string name,int elo,int money,int collection,int wins,int losses)
+        public Player(string name,int elo,int coins,int collection,int wins,int losses)
         {
             this.Name = name;
             this.Token = name + "-Token"; //you don't need a password here cause you should never have it outside of DB
             this.Elo = elo; //1000 default
-            this.Money = money; //25 default
+            this.Coins = coins; //25 default
             this.Deck[0] = -1; //to be set before you play
             CollectionDecr(collection); //integer
             this.Wins = wins;
@@ -50,7 +51,10 @@ namespace MTCG.SystemLogicClasses
         }
 
 
-//maybe have return self json here
+        public string ReturnCollection() //have this included every time you buy packs or do trades
+        {
+            return JsonConvert.SerializeObject(this.Collection);
+        }
 
         public void CreateDeck(int[] ar) 
         {
@@ -94,7 +98,23 @@ namespace MTCG.SystemLogicClasses
         }
         public void UpdateElo(int p2_elo, char outcome)
         {
-            //literally just copy paste chess elo
+            switch(outcome)
+            {
+                case 'a':
+                    this.Elo +=25;
+                    this.Wins++;
+                    break;
+                case 'b':
+                    this.Elo -= 25;
+                    this.Losses++;
+                    break;
+                case 'c':
+                    break;
+            }
+
+            PlayerDAO dao= new PlayerDAOImpl();
+            dao.UpdatePlayer(this);
+
             return;
         }
 

@@ -7,6 +7,7 @@ namespace MTCG.SystemLogicClasses
 {
     public class Battle
     {
+        //a -> p1, b-> p2, c-> draw
         private List<Player> _playerList = new List<Player>();
         private readonly Random _random = new Random();
         private CardFactory factory = new CardFactory();
@@ -18,7 +19,7 @@ namespace MTCG.SystemLogicClasses
         }
         public void Add(Player player)
         {
-            _playerList.Add(player); //seems to be reference
+            _playerList.Add(player); 
             Console.WriteLine(player.Name);
         }
         public void Play()
@@ -64,19 +65,21 @@ namespace MTCG.SystemLogicClasses
                 if (p1_decksize == 8)
                 {
                     Console.WriteLine($"{_playerList[0].Name} was victorious");
-                    //update Elo
+                    _playerList[0].UpdateElo(_playerList[1].Elo, 'a');
+                    _playerList[1].UpdateElo(_playerList[0].Elo, 'b');
                     return;
                 }
                 if (p2_decksize == 8)
                 {
                     Console.WriteLine($"{_playerList[1].Name} was victorious");
-                    //update Elo
+                    _playerList[0].UpdateElo(_playerList[1].Elo, 'b');
+                    _playerList[1].UpdateElo(_playerList[0].Elo, 'a');
                     return;
                 }
             }
             Console.WriteLine("Game ended in a Draw");
-            //Update Elo
-            //player with 0 cards loose elo other one gain
+            _playerList[0].UpdateElo(_playerList[1].Elo, 'c');
+            _playerList[1].UpdateElo(_playerList[0].Elo, 'c');
         }
         private char Round(int A, int B) //can't mark defeated cards cause out of scope
         {

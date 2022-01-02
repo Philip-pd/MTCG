@@ -31,12 +31,12 @@ namespace MTCG.SystemLogicClasses
             {
                 parametres = new String[tokens.Length - 7];
                 Array.Copy(tokens, 7, parametres, 0, tokens.Length - 7);
-                Console.WriteLine(String.Format("{0} {1} @ {2} \nRef: {3}", type, url, host, parametres));
+                Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
                 return new Request(type, url, host, parametres);
             }
             parametres = new String[tokens.Length - 7];
             Array.Copy(tokens, 7, parametres, 0, tokens.Length - 7);
-            Console.WriteLine(String.Format("{0} {1} @ {2} \nRef: {3}", type, url, host, parametres[1]));
+            Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
             return new Request(type, url, host, parametres);
 
         }

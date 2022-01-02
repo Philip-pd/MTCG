@@ -34,7 +34,12 @@ namespace UnitTests
                 Assert.AreEqual(a.Collection[i], true);
             }
         }
-
+        [Test]
+        public void ReturnsRightCollection()
+        {
+            Player a = new Player("p1", 1000, 20, 255, 0, 0);
+            Assert.AreEqual(a.ReturnCollection(),"[true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]");
+        }
         [Test]
         public void SpotsInvalidDeckNoCollection()
         {
@@ -99,9 +104,40 @@ namespace UnitTests
 
             Battle battle = new Battle(a, b); 
             battle.Play();
-            Assert.Pass();//replace with player 2 elo higher player 1 elo lower 
+            Assert.Greater(a.Elo,b.Elo);
 
         }
-        
+        [Test]
+        public void PlayerHandlerLoginWorks()
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0);
+            Player b = new Player("p2", 1000, 20, 1073741823, 0, 0);
+            Assert.AreEqual(handler.PlayerLogin(a), true); //unique player logs in
+            Assert.AreEqual(handler.PlayerLogin(a), false); //same player tries again
+            Assert.AreEqual(handler.PlayerLogin(b), true); //another different player tries logging in
+
+        }
+        [Test]
+        public void PlayerHandlerRetrieveWorks()
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player c = new Player("p3", 1000, 20, 1073741823, 0, 0); //need new player cause one from last test still persists cause singleton
+            Assert.AreEqual(handler.PlayerLogin(c), true);
+            Assert.AreEqual(handler.GetPlayerOnline("p3-Token"), c); 
+        }
+        //test open packs adds to collection
+        //test Make Trades
+        //test Test Accept Trades
+        //test can't accept trade if already in posession of card
+        //test can't cancel trade if got same card
+        //test sold card but already has so gets some gold instead //be like need to do something here but its kinda broken shouldn't have went with 1 card only
+        //test Enter MM
+        //Test a few Elo Calculations
+        //Test some Database Fetches
+        //Check if I get blocked from adding same user to DB without server Crashing
+        //test open packs returns money
+        //test PlayerDAO whatever
+
     }
 }

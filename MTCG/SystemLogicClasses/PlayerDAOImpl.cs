@@ -38,6 +38,7 @@ namespace MTCG.SystemLogicClasses
                WHERE name=@name";
             NpgsqlCommand c = command as NpgsqlCommand;
             c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Prepare();
             c.Parameters["name"].Value = name;
             command.ExecuteNonQuery();
         }
@@ -54,6 +55,7 @@ namespace MTCG.SystemLogicClasses
                WHERE name=@name";
             NpgsqlCommand c = command as NpgsqlCommand;
             c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Prepare();
             c.Parameters["name"].Value = name;
             NpgsqlDataReader dr = c.ExecuteReader();
             if(dr.Read())
@@ -66,7 +68,22 @@ namespace MTCG.SystemLogicClasses
 
         public Player GetPlayerLogin(string name,string pwd)
         {
-            throw new NotImplementedException();
+            IDbCommand command = Connect();
+            command.CommandText = @"SELECT * FROM players
+               WHERE name=@name AND password=@pwd";
+            NpgsqlCommand c = command as NpgsqlCommand;
+            c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Parameters.Add("pwd", NpgsqlDbType.Varchar, 64);
+            c.Prepare();
+            c.Parameters["name"].Value = name;
+            c.Parameters["pwd"].Value = pwd;
+            NpgsqlDataReader dr = c.ExecuteReader();
+            if (dr.Read())
+            {
+                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
+                return new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+            }
+            return null;
         }
 
         public void UpdatePlayer(Player toUpdate) //update literally every value except name & pwd

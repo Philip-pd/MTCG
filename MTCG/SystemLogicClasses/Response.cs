@@ -47,6 +47,10 @@ namespace MTCG.SystemLogicClasses
                         if (request.parametres.Length < 4) //if too few parametres
                             return MakeNullRequest();
                         return MakePlayer(request.parametres[1], request.parametres[3]); //right ones
+                    case "/Login":
+                        if (request.parametres.Length < 4) //if too few parametres
+                            return MakeNullRequest();
+                        return LoginPlayer(request.parametres[1], request.parametres[3]); //right ones
                     default:
                         return MakePageNotFound();
                 }
@@ -55,6 +59,21 @@ namespace MTCG.SystemLogicClasses
             {
                 return MakeMethodNotAllowed();
             }
+        }
+
+        //------Good Responses ----------//
+
+        private static Response LoginPlayer(string name, string password)
+        {
+            PlayerDAO dao = new PlayerDAOImpl();
+            Player LoggedIn = dao.GetPlayerLogin(name, password);
+            if (LoggedIn == null)
+                return ResetContentRequest();
+            string returntext = LoggedIn.Token;
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "text/html", d); //returns just the token so client knows what to use now
+            //if logged in already return  409 Conflict - This Player is already logged in
         }
 
         private static Response MakePlayer(string name, string pwd) //remove just used for tests
@@ -74,40 +93,44 @@ namespace MTCG.SystemLogicClasses
             string returntext = JsonConvert.SerializeObject(temp);
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
-            return new Response("200 OK", "application/json", d);
+            return new Response("201 Created", "application/json", d);
         }
 
-        private static Response ResetContentRequest()
-        {
-            string returntext="Invalid Parametres"; //client would then based on context check if entry too long or invalid password
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            Byte[] d = enc.GetBytes(returntext);
-            return new Response("205 Reset Content", "text/html", d);
-        }
+        //----------ERROR CODES-------------//
 
-        private static Response MakeNullRequest() //400
-        {
-            string returntext = "Bad Request"; 
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            Byte[] d = enc.GetBytes(returntext);
-            return new Response("400 Bad Request", "text/html", d);
-        }
+            private static Response ResetContentRequest() //205
+            {
+                string returntext="Invalid Parametres"; //client would then based on context check if entry too long or invalid password
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("205 Reset Content", "text/html", d);
+            }
 
-        private static Response MakePageNotFound() //404
-        {
-            string returntext = "Doesn't Exist"; 
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            Byte[] d = enc.GetBytes(returntext);
-            return new Response("404 Page Not Found", "text/html", d);
-        }
+            private static Response MakeNullRequest() //400
+            {
+                string returntext = "Bad Request"; 
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("400 Bad Request", "text/html", d);
+            }
 
-        private static Response MakeMethodNotAllowed() //405
-        {
-            string returntext = "Unsupported Method";
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            Byte[] d = enc.GetBytes(returntext);
-            return new Response("405 Method Not Allowed", "text/html", d);
-        }
+            private static Response MakePageNotFound() //404
+            {
+                string returntext = "Doesn't Exist"; 
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("404 Page Not Found", "text/html", d);
+            }
+
+            private static Response MakeMethodNotAllowed() //405
+            {
+                string returntext = "Unsupported Method";
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("405 Method Not Allowed", "text/html", d);
+            }
+
+        //--Send back to Client--//
 
         public void Post(NetworkStream stream) //returns to Client
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using Newtonsoft.Json;
 
 namespace MTCG.SystemLogicClasses
 {
@@ -9,20 +10,25 @@ namespace MTCG.SystemLogicClasses
     {
         
         public string Name { get; }
-        public string Password { get; }
+        [JsonIgnore]
+        public string Token { get; }
         public int Elo { get; }
         public int Money { get; set; }
-        public int[] Deck { get; } = new int[4]; //5-7 only needed for battle logic
+        public int[] Deck { get; } = new int[4]; //Deck is not tracked by server and needs to be set before playing
         public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards (only need 30 but no int with 30 bit) 
+        public int Wins { get; }
+        public int Losses { get; }
 
-        public Player(string name, string pass,int elo,int money,int collection)
+        public Player(string name,int elo,int money,int collection,int wins,int losses)
         {
             this.Name = name;
-            this.Password = pass;
+            this.Token = name + "-Token"; //you don't need a password here cause you should never have it outside of DB
             this.Elo = elo; //1000 default
             this.Money = money; //25 default
             this.Deck[0] = -1; //to be set before you play
             CollectionDecr(collection); //integer
+            this.Wins = wins;
+            this.Losses = losses;
             
         }
         private void CollectionDecr(int number)
@@ -44,13 +50,7 @@ namespace MTCG.SystemLogicClasses
         }
 
 
-        public void PrintData() //instead make so returns Json and put it to client for profile view
-        {
-            Console.WriteLine("Data:  Name: " + this.Name +
-                " | Password: " + this.Password + " | Elo:" + this.Elo +
-                " | Money: " + this.Money + " | Deck:" + this.Deck[0] + " " + this.Deck[1] + " " + this.Deck[2] + " " + this.Deck[3]);
-
-        }
+//maybe have return self json here
 
         public void CreateDeck(int[] ar) 
         {

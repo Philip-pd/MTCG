@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -27,13 +28,9 @@ namespace MTCG.SystemLogicClasses
 
             if (request.Type == "GET") 
             {
-                String[] tokens = request.URL.Split('?', '=', '&'); //Get GET Parametres out of URL
-                switch (tokens[0]) //Look where it wants to go
+                String[] info = request.URL.Split('?', '=', '&'); //Get GET Parametres out of URL
+                switch (info[0]) //Look where it wants to go
                 {
-                    case "/calculate": 
-                        if (tokens.Length < 4) //if not enough params then send error.
-                            return MakeNullRequest(); //400
-                        return MakePlayer(tokens[2], tokens[4]); //Get right params and send. Maybe do procedural but let's see
                     case "/demo":
                         System.Threading.Thread.Sleep(10000); //Just to test multithreadedness.
                         return MakeNullRequest(); //400
@@ -63,9 +60,8 @@ namespace MTCG.SystemLogicClasses
         private static Response MakePlayer(string name, string pwd) //remove just used for tests
         {
             PlayerDAO dao = new PlayerDAOImpl();
-            if (name.Length > 32 || pwd.Length > 64)
-                return ResetContentRequest();
-            dao.AddPlayer(name, pwd);
+            if (name.Length > 32 || pwd.Length > 64 || !dao.AddPlayer(name, pwd))
+                return ResetContentRequest();            
             return ShowPlayerJSON(name);
         }
 
@@ -73,12 +69,12 @@ namespace MTCG.SystemLogicClasses
         {
             PlayerDAO dao = new PlayerDAOImpl();
             Player temp = dao.GetPlayerInfo(name);
-
-            string returntext = "Player JSON here"; 
+            if (temp == null)
+                return MakePageNotFound();
+            string returntext = JsonConvert.SerializeObject(temp);
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
-            return new Response("200 OK", "text/html", d); //should instead return mime code for json + player json
-
+            return new Response("200 OK", "application/json", d);
         }
 
         private static Response ResetContentRequest()
@@ -89,49 +85,27 @@ namespace MTCG.SystemLogicClasses
             return new Response("205 Reset Content", "text/html", d);
         }
 
-        private static Response MakeFromFile(FileInfo fi) //200 on file return remove later
-        {
-            FileStream fs = fi.OpenRead();
-            BinaryReader reader = new BinaryReader(fs);
-            Byte[] d = new byte[fs.Length];
-            reader.Read(d, 0, d.Length);
-            fs.Close();
-            return new Response("200 OK", "text/html", d);
-        }
-
         private static Response MakeNullRequest() //400
         {
-            string file = Environment.CurrentDirectory + HTTPServer.MSG_DIR + "400.html";
-            FileInfo fi = new FileInfo(file);
-            FileStream fs = fi.OpenRead();
-            BinaryReader reader = new BinaryReader(fs);
-            Byte[] d = new byte[fs.Length];
-            reader.Read(d, 0, d.Length);
-            fs.Close();
+            string returntext = "Bad Request"; 
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
             return new Response("400 Bad Request", "text/html", d);
         }
 
         private static Response MakePageNotFound() //404
         {
-            string file = Environment.CurrentDirectory + HTTPServer.MSG_DIR + "404.html";
-            FileInfo fi = new FileInfo(file);
-            FileStream fs = fi.OpenRead();
-            BinaryReader reader = new BinaryReader(fs);
-            Byte[] d = new byte[fs.Length];
-            reader.Read(d, 0, d.Length);
-            fs.Close();
+            string returntext = "Doesn't Exist"; 
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
             return new Response("404 Page Not Found", "text/html", d);
         }
 
         private static Response MakeMethodNotAllowed() //405
         {
-            string file = Environment.CurrentDirectory + HTTPServer.MSG_DIR + "405.html";
-            FileInfo fi = new FileInfo(file);
-            FileStream fs = fi.OpenRead();
-            BinaryReader reader = new BinaryReader(fs);
-            Byte[] d = new byte[fs.Length];
-            reader.Read(d, 0, d.Length);
-            fs.Close();
+            string returntext = "Unsupported Method";
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
             return new Response("405 Method Not Allowed", "text/html", d);
         }
 
@@ -146,3 +120,4 @@ namespace MTCG.SystemLogicClasses
         }
     }
 }
+//overall get rid of all the file things

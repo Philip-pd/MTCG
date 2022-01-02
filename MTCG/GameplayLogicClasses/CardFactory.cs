@@ -32,34 +32,34 @@ namespace MTCG.GameplayLogicClasses
             int _Type =( id - (int)_Element)/ ElementTypes;
             switch (_Type) //remove Element Offset from ID  //Modulo Element Types for expandability
             {
-                case 0:
+                case 0: //0-2
                     Gen = new Goblin(_Element, 20, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 1:
+                case 1: //3-5
                     Gen = new Dragon(_Element, 30, Enum.GetName(typeof(cardname), _Type)); 
                     break;
-                case 2:
+                case 2: //6-8
                     Gen = new Wizzard(_Element, 11, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 3:
+                case 3: //9-11
                     Gen = new Orc(_Element, 25, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 4:
+                case 4: //12-14
                     Gen = new Knight(_Element, 25, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 5:
+                case 5: //15-17
                     Gen = new Kraken(_Element, 55, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 6:
+                case 6: //18-20
                     Gen = new Elf(_Element, 24, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 7:
+                case 7: //21-23
                     Gen = new Troll(_Element, 30, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 8:
+                case 8: //24-26
                     Gen = new Duck(_Element, 5, Enum.GetName(typeof(cardname), _Type));
                     break;
-                case 9:
+                case 9: //27-29
                     Gen = new SpellCard(_Element, 20);
                     break;
 

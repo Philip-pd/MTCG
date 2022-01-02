@@ -27,8 +27,10 @@ namespace MTCG.SystemLogicClasses
             string host = tokens[4];
             String[] parametres = null;
 
-            if (type == "GET") //Get Parametres are in adress bar so no need here
+            if (type == "GET") //Get Parametres are in adress bar But you will neeed the 1 header with the token
             {
+                parametres = new String[tokens.Length - 7];
+                Array.Copy(tokens, 7, parametres, 0, tokens.Length - 7);
                 Console.WriteLine(String.Format("{0} {1} @ {2} \nRef: {3}", type, url, host, parametres));
                 return new Request(type, url, host, parametres);
             }

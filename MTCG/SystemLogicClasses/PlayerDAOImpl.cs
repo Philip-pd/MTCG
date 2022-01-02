@@ -9,7 +9,7 @@ namespace MTCG.SystemLogicClasses
 {
     class PlayerDAOImpl : PlayerDAO //Create playerdata class which only has values and doesn't implement actual functions
     {
-        public void AddPlayer(string name, string pwd) //take all data from the player
+        public bool AddPlayer(string name, string pwd) //take all data from the player
         {
             IDbCommand command = Connect();
             command.CommandText = @"insert into players(name,password)
@@ -20,7 +20,15 @@ namespace MTCG.SystemLogicClasses
             c.Prepare();
             c.Parameters["name"].Value = name;
             c.Parameters["pwd"].Value = pwd;
+            try
+            {
+
             command.ExecuteNonQuery(); //somehow check if it worked or check prior if exists
+                return true;
+            } catch(NpgsqlException)
+            {
+                return false;
+            }
         }
 
         public void DeletePlayer(string name)
@@ -41,7 +49,19 @@ namespace MTCG.SystemLogicClasses
 
         public Player GetPlayerInfo(string name) //still gotta do this
         {
-            throw new NotImplementedException();
+            IDbCommand command = Connect();
+            command.CommandText = @"SELECT * FROM players
+               WHERE name=@name";
+            NpgsqlCommand c = command as NpgsqlCommand;
+            c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Parameters["name"].Value = name;
+            NpgsqlDataReader dr = c.ExecuteReader();
+            if(dr.Read())
+            { 
+                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
+            return new Player((string)dr[0],(int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+            }
+            return null;
         }
 
         public Player GetPlayerLogin(string name,string pwd)
@@ -49,7 +69,7 @@ namespace MTCG.SystemLogicClasses
             throw new NotImplementedException();
         }
 
-        public void UpdatePlayer(Player toUpdate) //update literally every value except id,name & pwd
+        public void UpdatePlayer(Player toUpdate) //update literally every value except name & pwd
         {
             throw new NotImplementedException();
         }

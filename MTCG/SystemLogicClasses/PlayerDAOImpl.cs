@@ -54,8 +54,9 @@ namespace MTCG.SystemLogicClasses
             NpgsqlDataReader dr = c.ExecuteReader();
             while (dr.Read())
             {
+                int[] deck = (int[])dr.GetValue(7);
                 //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
-                Player toAdd = new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+                Player toAdd = new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6], deck);
                 players.Add(toAdd);
             }
             
@@ -73,9 +74,10 @@ namespace MTCG.SystemLogicClasses
             c.Parameters["name"].Value = name;
             NpgsqlDataReader dr = c.ExecuteReader();
             if(dr.Read())
-            { 
+            {
+                int[] deck = (int[])dr.GetValue(7);
                 //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
-            return new Player((string)dr[0],(int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+                return new Player((string)dr[0],(int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6],deck);
             }
             return null;
         }
@@ -94,8 +96,9 @@ namespace MTCG.SystemLogicClasses
             NpgsqlDataReader dr = c.ExecuteReader();
             if (dr.Read())
             {
+                int[] deck = (int[])dr.GetValue(7);
                 //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
-                return new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6]);
+                return new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6], deck);
             }
             return null;
         }
@@ -121,9 +124,22 @@ namespace MTCG.SystemLogicClasses
             c.Parameters["win"].Value = toUpdate.Wins;
             c.Parameters["loss"].Value = toUpdate.Losses;
             command.ExecuteNonQuery();
-
         }
-        //update player deck. add 4 ints for deck in pgsql as well & be like default sets 0 to -1 and rest to 0
+
+        public void UpdatePlayerDeck(Player player)
+        {
+            IDbCommand command = Connect();
+            command.CommandText = @"UPDATE players
+                SET deck=@deck
+                WHERE name = @name";
+            NpgsqlCommand c = command as NpgsqlCommand;
+            c.Parameters.Add("name", NpgsqlDbType.Varchar, 32);
+            c.Parameters.Add("deck", NpgsqlDbType.Array | NpgsqlDbType.Integer);
+            c.Prepare();
+            c.Parameters["name"].Value = player.Name;
+            c.Parameters["deck"].Value = player.Deck;
+            command.ExecuteNonQuery();
+        }
 
         public IDbCommand Connect()
         {
@@ -134,7 +150,5 @@ namespace MTCG.SystemLogicClasses
             return command;
             
         }
-
-        
     }
 }

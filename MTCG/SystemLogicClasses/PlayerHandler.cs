@@ -31,33 +31,92 @@ namespace MTCG.SystemLogicClasses
         }
         public bool PlayerLogin(Player toAdd)
         {
-            for(int i = 0; i<PlayersOnline.Count;i++)
+            lock (padlock)
             {
-                if (PlayersOnline[i].Name == toAdd.Name)
-                    return false;
+                for (int i = 0; i < PlayersOnline.Count; i++)
+                {
+                    if (PlayersOnline[i].Name == toAdd.Name)
+                        return false;
+                }
+                this.PlayersOnline.Add(toAdd);
             }
-            this.PlayersOnline.Add(toAdd);
             return true;
         }
 
-        public Player GetPlayerOnline(string token)
+        public Player GetPlayerOnline(string token)  
         {
-            foreach(Player player in PlayersOnline)
+            lock (padlock)
             {
-                if (player.Token == token)
-                    return player;
+                foreach (Player player in PlayersOnline)
+                {
+                    if (player.Token == token)
+                        return player;
+                }
             }
             return null;
         }
 
         public Player GetPlayerMatchmaking(string token)
         {
-            foreach (Player player in PlayersInMM)
+            lock (padlock)
             {
-                if (player.Token == token)
-                    return player;
+                foreach (Player player in PlayersInMM)
+                {
+                    if (player.Token == token)
+                        return player;
+                }
             }
             return null;
         }
+
+        public bool PlayerLogout(string token)
+        {
+            lock (padlock)
+            {
+                foreach (Player player in PlayersInMM) //in case you are still Queued remove you from queue
+                {
+                    if (player.Token == token)
+                    {
+                        PlayersInMM.Remove(player);
+                    }
+                }
+                foreach (Player player in PlayersOnline) //remove you from list of online Players
+                {
+                    if (player.Token == token)
+                    {
+                        PlayersOnline.Remove(player);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public string PlayerEnterMM(string token) //test this multithreaded
+        {
+            Player toAdd = this.GetPlayerOnline(token); //get from logged in list
+            if (toAdd == null)
+                return "error";
+            Battle battle = null;
+            lock (padlock)
+            {
+                foreach (Player player in PlayersInMM) //check if already in MM
+                {
+                if (player.Token == token)
+                    return "error";
+                }
+                if(toAdd.Deck[0]==-1)
+                    return "InvalidDeck";
+                PlayersInMM.Add(toAdd); //Add to MM
+                
+            
+                if (PlayersInMM.Count<2)
+                return "Player Successfully entered Queue. Waiting for Opponent...";
+                battle = new Battle(PlayersInMM[0], PlayersInMM[1]);
+                PlayersInMM.RemoveAt(0);
+                PlayersInMM.RemoveAt(0);
+            }
+            return battle.Play();
+        }
     }
+    
 }

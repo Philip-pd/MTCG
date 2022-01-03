@@ -17,31 +17,28 @@ namespace MTCG
              * 
              * Gameplay Logic:
              * 
-             *  Elo System: Build Base one now do complex later  3
+             *  Elo System: Build Base one now do complex later  Y
              *  
-             *  Dictionary for Weakness 4
              * 
              * System Logic:
              * 
-             *  DataBase 1
+             *  DataBase Y
              *  
-             *      Profile
+             *      Profile Y
              *  
-             *      Ranking
+             *      Ranking Y
              *      
-             *          Create User (in MM)
              *          or
-             *          Create user on login and then use token of (sha256 of password + username + sha256 of password) as Identifier of User
-             *          so the SQL don't break
+             *          Create user on login Y
              *       Packs 2
              *  
              *  Trading 2
              *  
-             *  Rest 1.2
+             *  Rest Y
              *  
              *      MatchMaking
              *  
-             *      Multithread
+             *      Multithread Y
              * 
              */
         }

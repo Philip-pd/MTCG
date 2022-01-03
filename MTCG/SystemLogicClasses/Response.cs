@@ -36,13 +36,15 @@ namespace MTCG.SystemLogicClasses
                         return MakeNullRequest(); //400
                     case "/Ranking": //List of players based on elo
                         return MakePlayerList();
-                    case "/Player": //?name=name <-- get that also no need to be logged in; 1
+                    case "/Player": //?name=name <-- get that also no need to be logged in; 
                         return ShowPlayerJSON(info[2]); //?name= info[2]
                     case "/Collection": //just returns own collection
                         return MakeOwnCollection(request.parametres[1]); //parameter 1 is token
-                    case "/Trades": //List of all trades that are currently open 3
+                    case "/Trades": //List of all trades that are currently open 
                         break;
-                    case "/Packs": //gives Pack info 2
+                    case "/Pack": //gives Pack info 
+                        return ShowPackInfo(info[2]); //?id= info[2]
+                    case "/Battle": //Instantly sent by client after entering MM and no imediate battle. Waits for Battle Results
                         break;
                     default:
                         return MakePageNotFound(); //404
@@ -56,20 +58,21 @@ namespace MTCG.SystemLogicClasses
                     case "/Player":
                         if (request.parametres.Length < 4) //if too few parametres
                             return MakeNullRequest();
-                        return MakePlayer(request.parametres[1], request.parametres[3]); //right ones
+                        return MakePlayer(request.parametres[1], request.parametres[3]); //1=name, 3=pwd
                     case "/Login":
                         if (request.parametres.Length < 4) //if too few parametres
                             return MakeNullRequest();
-                        return LoginPlayer(request.parametres[1], request.parametres[3]); //right ones
-                    case "/Trade": //if only 1 param it accepts that trade else it makes its own 3
+                        return LoginPlayer(request.parametres[1], request.parametres[3]); //1=name, 3=pwd
+                    case "/Trade": //if only 1 param it accepts that trade else it makes its own 
                         break;
-                    case "/Pack": //Buys Pack 1
-                        break;
-                    case "/Battle": //Joins MM 4
-                        break;
+                    case "/Pack": //Buys Pack 
+                        return BuyPack(request.parametres[1], request.parametres[3]); //1=token, 3=packID
+                    case "/EnterMM": //Joins MM  //returns more to come or if already 1 inside gets battle results
+                        return EnterMM(request.parametres[1]);
                     case "/Logout": //Removes from PlayerOnline
-                        break;
-
+                        return LogOutPlayer(request.parametres[1]);
+                    case "/Deck": //makes a deck takes 5 params. Token and 4 fields for deck
+                        return UpdateDeck(request.parametres[1], request.parametres[3]); //1=token, 3=cards
                     default:
                         return MakePageNotFound();
                 }
@@ -81,34 +84,58 @@ namespace MTCG.SystemLogicClasses
             }
         }
 
-        
 
-        private static Response MakePlayerList()
-        {
-            PlayerDAO dao = new PlayerDAOImpl();
-            List<Player> players = dao.GetAllPlayers();
-            string returntext = JsonConvert.SerializeObject(players, Formatting.Indented);
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            Byte[] d = enc.GetBytes(returntext);
-            return new Response("200 OK", "application/json", d);
-        }
+
+
 
         //------Good Responses ----------//
 
+        private static Response EnterMM(string token)
+        {
+            string code= "200 OK";
+            PlayerHandler handler = PlayerHandler.Instance;
+            if (handler.GetPlayerOnline(token)==null) //Checks here as well for different error code
+                return NotLoggedIn();
+            string returntext = handler.PlayerEnterMM(token);
+            if (returntext == "error")
+                return AlreadyQueued();
+            if (returntext == "InvalidDeck")
+                code = "403 Forbidden";
+            if (returntext== "Player Successfully entered Queue. Waiting for Opponent...")
+            {
+                code = "202 Accepted";//Client imediateley sends GET Battle request after
+            } //add if 2 queue for instant info
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response(code, "text/html", d);
+
+
+        }
         private static Response LoginPlayer(string name, string password)
         {
             PlayerDAO dao = new PlayerDAOImpl();
-            Player LoggedIn = dao.GetPlayerLogin(name, password);
+            Player LoggedIn = dao.GetPlayerLogin(name, password); //check if player could log in
             if (LoggedIn == null)
                 return ResetContentRequest();
-            PlayerHandler handler = PlayerHandler.Instance;
-            if (!handler.PlayerLogin(LoggedIn))
+            PlayerHandler handler = PlayerHandler.Instance; //use playerhandler for state management
+            if (!handler.PlayerLogin(LoggedIn)) //check if player is already logged in
                 return MakeAlreadyLoggedIn();
-            string returntext = LoggedIn.Token;
+            string returntext = LoggedIn.Token; //return token
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
             return new Response("200 OK", "text/html", d); //returns just the token so client knows what to use now
             //if logged in already return  409 Conflict - This Player is already logged in
+        }
+
+        private static Response LogOutPlayer(string token)
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            if (!handler.PlayerLogout(token)) //check if Logged in
+                return NotLoggedIn();
+            string returntext = "Logout Successful";
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "text/html", d);
         }
 
         private static Response MakeOwnCollection(string token)
@@ -155,9 +182,75 @@ namespace MTCG.SystemLogicClasses
             return new Response("200 OK", "application/json", d);
         }
 
+        private static Response MakePlayerList()
+        {
+            PlayerDAO dao = new PlayerDAOImpl();
+            List<Player> players = dao.GetAllPlayers();
+            string returntext = JsonConvert.SerializeObject(players, Formatting.Indented);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+
+        private static Response ShowPackInfo(string packID)
+        {
+            int pack = 0;
+            if (!Int32.TryParse(packID, out pack) || pack < 0 || pack > 10) //check if pack exists
+                return MakeNullRequest();
+            BoosterPack booster = new BoosterPack();
+            string returntext = JsonConvert.SerializeObject(booster.GetPack(pack));
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+        private static Response BuyPack(string token, string packID)
+        {
+            int pack = 0;
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player player = handler.GetPlayerOnline(token);
+            if (player == null) //check if Logged in
+                return NotLoggedIn();
+            if (player.Coins < 5)
+                return InsufficientFunds();
+            if (!Int32.TryParse(packID, out pack) || pack < 0 || pack > 10) //check if pack exists
+                return MakeNullRequest();
+            BoosterPack booster = new BoosterPack();
+            int[] newCards = booster.GetPack(pack);
+            int added = player.AddBoosterToCollection(newCards);
+            string returntext = $"{{\r\"NewCardsAdded\": { added},\r\"CoinsRefunded\": {5 - added},\"Collection\":\r{player.ReturnCollection()}}}";
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+
+        private static Response UpdateDeck(string token, string content)
+        {
+            string[] deckstrings = content.Split(',');
+            int[] deckints = new int[4];
+            if (deckstrings.Length != 4)
+                return MakeNullRequest();
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player player = handler.GetPlayerOnline(token);
+            if (player == null)
+                return NotLoggedIn();
+            for (int i = 0; i < deckstrings.Length; i++)
+            {
+                if (!Int32.TryParse(deckstrings[i], out deckints[i]))
+                    return MakeNullRequest();
+            }
+            if (!player.CreateDeck(deckints))
+                return NotInCollection();
+            string returntext = JsonConvert.SerializeObject(player.Deck);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
+
+
+
         //----------ERROR CODES-------------//
 
-        private static Response ResetContentRequest() //205
+            private static Response ResetContentRequest() //205
             {
                 string returntext="Invalid Parametres"; //client would then based on context check if entry too long or invalid password
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
@@ -181,13 +274,29 @@ namespace MTCG.SystemLogicClasses
                 return new Response("403 Forbidden", "text/html", d);
             }
 
-            private static Response MakePageNotFound() //404
+            private static Response NotInCollection() //403
             {
-                string returntext = "Doesn't Exist"; 
+                string returntext = "Error: One or More Cards You selected aren't part of your collection";
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
                 Byte[] d = enc.GetBytes(returntext);
-                return new Response("404 Page Not Found", "text/html", d);
+                return new Response("403 Forbidden", "text/html", d);
             }
+
+            private static Response InsufficientFunds() //403
+            {
+                string returntext = "Isufficient Funds";
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("403 Forbidden", "text/html", d);
+            }
+
+            private static Response MakePageNotFound() //404
+                {
+                    string returntext = "Doesn't Exist"; 
+                    System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                    Byte[] d = enc.GetBytes(returntext);
+                    return new Response("404 Page Not Found", "text/html", d);
+                }
 
             private static Response MakeMethodNotAllowed() //405
             {
@@ -205,6 +314,14 @@ namespace MTCG.SystemLogicClasses
             return new Response("409 Conflict", "text/html", d);
             }
 
+            private static Response AlreadyQueued() //409
+            {
+                string returntext = "Already In Queue";
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("409 Conflict", "text/html", d);
+            }
+
         //--Send back to Client--//
 
         public void Post(NetworkStream stream) //returns to Client
@@ -218,4 +335,3 @@ namespace MTCG.SystemLogicClasses
         }
     }
 }
-//overall get rid of all the file things

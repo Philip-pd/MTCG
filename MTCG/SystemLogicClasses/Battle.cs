@@ -22,7 +22,7 @@ namespace MTCG.SystemLogicClasses
             _playerList.Add(player); 
             Console.WriteLine(player.Name);
         }
-        public void Play()
+        public string Play()
         {
             int[] p1_deck = new int[8];
             int[] p2_deck = new int[8];
@@ -67,19 +67,20 @@ namespace MTCG.SystemLogicClasses
                     Console.WriteLine($"{_playerList[0].Name} was victorious");
                     _playerList[0].UpdateElo(_playerList[1].Elo, 'a');
                     _playerList[1].UpdateElo(_playerList[0].Elo, 'b');
-                    return;
+                    return $"{_playerList[0].Name} was victorious";
                 }
                 if (p2_decksize == 8)
                 {
                     Console.WriteLine($"{_playerList[1].Name} was victorious");
                     _playerList[0].UpdateElo(_playerList[1].Elo, 'b');
                     _playerList[1].UpdateElo(_playerList[0].Elo, 'a');
-                    return;
+                    return $"{_playerList[1].Name} was victorious";
                 }
             }
             Console.WriteLine("Game ended in a Draw");
             _playerList[0].UpdateElo(_playerList[1].Elo, 'c');
             _playerList[1].UpdateElo(_playerList[0].Elo, 'c');
+            return "Game ended in a Draw";
         }
         private char Round(int A, int B) //can't mark defeated cards cause out of scope
         {

@@ -20,17 +20,26 @@ namespace MTCG.SystemLogicClasses
         public int Wins { get; set; }
         public int Losses { get; set; }
 
-        public Player(string name,int elo,int coins,int collection,int wins,int losses)
+        public Player(string name,int elo,int coins,int collection,int wins,int losses,int[] deck)
         {
             this.Name = name;
             this.Token = name + "-Token"; //you don't need a password here cause you should never have it outside of DB
             this.Elo = elo; //1000 default
-            this.Coins = coins; //25 default
-            this.Deck[0] = -1; //to be set before you play
-            CollectionDecr(collection); //integer
+            this.Coins = coins;          
             this.Wins = wins;
             this.Losses = losses;
-            
+            CollectionDecr(collection); //integer
+            if (deck == null)
+            {
+                this.Deck[0] = -1;
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    this.Deck[i] = deck[i];
+                }
+            }
         }
         private void CollectionDecr(int number)
         {
@@ -50,51 +59,74 @@ namespace MTCG.SystemLogicClasses
 
         }
 
+        public int AddBoosterToCollection(int[] newCards)
+        {
+            this.Coins -= 5;
+            int duplicates=0;
+            for(int i = 0; i<newCards.Length;i++)
+            {
+                if (this.Collection[newCards[i]]==true)
+                {
+                    duplicates++;
+                    continue;
+                }
+                this.Collection[newCards[i]] = true;
+            }
+            this.Coins += duplicates; //refund for cards you already had
+            PlayerDAO dao = new PlayerDAOImpl();
+            dao.UpdatePlayer(this); //instant update in Database
+            return 5 - duplicates;
+        }
+
 
         public string ReturnCollection() //have this included every time you buy packs or do trades
         {
             return JsonConvert.SerializeObject(this.Collection);
         }
 
-        public void CreateDeck(int[] ar) 
+        public bool CreateDeck(int[] ar) 
         {
-            for (int i = 0; i < 4; i++)
+            if(ValidateDeck(ar))
             {
-                this.Deck[i] = ar[i];
+                for (int i = 0; i < 4; i++)
+                {
+                    this.Deck[i] = ar[i];
+                }
+                PlayerDAO dao = new PlayerDAOImpl();
+                dao.UpdatePlayerDeck(this);
+                return true;
             }
-            ValidateDeck();
+            return false;
 
         }
 
-        private void ValidateDeck() //call whenever make new Deck
+        private bool ValidateDeck(int[] ar) //call whenever make new Deck
         {
             int[] prev = new int[4]; //only needs to check first 3 but saves headache
             for (int i = 0; i < 4; i++) //works //should check for doubles
             {
                 try
                 {
-                    prev[i] = this.Deck[i];
-                    if (this.Collection[this.Deck[i]] == false) //checks if you own the cards
+                    prev[i] = ar[i];
+                    if (!this.Collection[ar[i]]) //checks if you own the cards
                     {
-                        this.Deck[0] = -1;
-                        return;
+                        return false;
                     }
                     for(int j=0;j<i;j++)
                     {
-                        if (this.Deck[i] == prev[j]) //checks if you only used each card once
+                        if (ar[i] == prev[j]) //checks if you only used each card once
                         {
-                            this.Deck[0] = -1;
-                            return;
+                            return false;
                         }
                     }
                 }
                 catch (System.NullReferenceException e)
                 {
                     Console.WriteLine("Collection OoB: " + e);
-                    this.Deck[0] = -1;
-                    return;
+                    return false;
                 }
             }
+            return true;
         }
         public void UpdateElo(int p2_elo, char outcome)
         {

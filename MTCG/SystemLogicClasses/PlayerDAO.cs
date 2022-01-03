@@ -12,7 +12,6 @@ namespace MTCG.SystemLogicClasses
         bool AddPlayer(string name, string pwd); //change to bool and if didn't work then send error
         void UpdatePlayer(Player toUpdate);
         void DeletePlayer(string name);
-        
-
+        void UpdatePlayerDeck(Player player);
     }
 }

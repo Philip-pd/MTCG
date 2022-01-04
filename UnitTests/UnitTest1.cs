@@ -170,13 +170,12 @@ namespace UnitTests
         //test Make Trades
         //test Test Accept Trades
         //test can't accept trade if already in posession of card
-        //test can't cancel trade if got same card
-        //test sold card but already has so gets some gold instead //be like need to do something here but its kinda broken shouldn't have went with 1 card only
+        //test Cancel Trade
+        //test sold card but already has so gets some gold instead 
         //test Enter MM
         //Test a few Elo Calculations
         //Test some Database Fetches
         //Check if I get blocked from adding same user to DB without server Crashing
-        //test open packs returns money
         //test PlayerDAO whatever
 
     }

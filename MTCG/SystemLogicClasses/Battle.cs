@@ -11,6 +11,7 @@ namespace MTCG.SystemLogicClasses
         private List<Player> _playerList = new List<Player>();
         private readonly Random _random = new Random();
         private CardFactory factory = new CardFactory();
+        private static readonly object decklock = new object();
 
         public Battle(Player player1, Player player2)
         {
@@ -29,8 +30,11 @@ namespace MTCG.SystemLogicClasses
             int p1_decksize = 4;
             int p2_decksize = 4;
 
-            p1_deck = DeckSort(_playerList[0].Deck); //lock the two
+            lock(decklock) //allow deck edits up to game start but block them as soon as you enter
+            {
+            p1_deck = DeckSort(_playerList[0].Deck); 
             p2_deck = DeckSort(_playerList[1].Deck);
+            } //no need to lock any longer since decks which are used in gameplay aren't tied to player class
 
 
             for (int i = 0; i < 100; i++)

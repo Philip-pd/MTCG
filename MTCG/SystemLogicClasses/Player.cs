@@ -19,6 +19,7 @@ namespace MTCG.SystemLogicClasses
         public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards (only need 30 but no int with 30 bit) 
         public int Wins { get; set; }
         public int Losses { get; set; }
+        private static readonly object playerlock = new object();
 
         public Player(string name,int elo,int coins,int collection,int wins,int losses,int[] deck)
         {
@@ -44,8 +45,10 @@ namespace MTCG.SystemLogicClasses
         private void CollectionDecr(int number)
         {
             BitArray b = new BitArray(new int[] { number});
-            
-            b.CopyTo(this.Collection, 0);
+            lock(playerlock)
+            { 
+                b.CopyTo(this.Collection, 0);
+            }
         }
 
 
@@ -54,25 +57,32 @@ namespace MTCG.SystemLogicClasses
             BitArray ColBits = new BitArray(this.Collection);
 
             int[] array = new int[1];
-            ColBits.CopyTo(array, 0);
+            lock (playerlock)
+            {
+                ColBits.CopyTo(array, 0);
+            }
             return array[0];
 
         }
 
         public int AddBoosterToCollection(int[] newCards)
         {
-            this.Coins -= 5;
-            int duplicates=0;
-            for(int i = 0; i<newCards.Length;i++)
+            int duplicates = 0;
+            lock (playerlock)
             {
-                if (this.Collection[newCards[i]]==true)
+                this.Coins -= 5;
+                
+                for(int i = 0; i<newCards.Length;i++)
                 {
-                    duplicates++;
-                    continue;
+                    if (this.Collection[newCards[i]]==true)
+                    {
+                        duplicates++;
+                        continue;
+                    }
+                    this.Collection[newCards[i]] = true;
                 }
-                this.Collection[newCards[i]] = true;
+                this.Coins += duplicates; //refund for cards you already had
             }
-            this.Coins += duplicates; //refund for cards you already had
             PlayerDAO dao = new PlayerDAOImpl();
             dao.UpdatePlayer(this); //instant update in Database
             return 5 - duplicates;
@@ -88,9 +98,12 @@ namespace MTCG.SystemLogicClasses
         {
             if(ValidateDeck(ar))
             {
-                for (int i = 0; i < 4; i++)
-                {
-                    this.Deck[i] = ar[i];
+                lock(playerlock)
+                { 
+                    for (int i = 0; i < 4; i++)
+                    {
+                        this.Deck[i] = ar[i];
+                    }
                 }
                 PlayerDAO dao = new PlayerDAOImpl();
                 dao.UpdatePlayerDeck(this);
@@ -130,18 +143,21 @@ namespace MTCG.SystemLogicClasses
         }
         public void UpdateElo(int p2_elo, char outcome)
         {
-            switch(outcome)
+            lock(playerlock)
             {
-                case 'a':
-                    this.Elo +=25;
-                    this.Wins++;
-                    break;
-                case 'b':
-                    this.Elo -= 25;
-                    this.Losses++;
-                    break;
-                case 'c':
-                    break;
+                switch(outcome)
+                {
+                    case 'a':
+                        this.Elo +=25;
+                        this.Wins++;
+                        break;
+                    case 'b':
+                        this.Elo -= 25;
+                        this.Losses++;
+                        break;
+                    case 'c':
+                        break;
+                }
             }
 
             PlayerDAO dao= new PlayerDAOImpl();

@@ -97,7 +97,7 @@ namespace MTCG.SystemLogicClasses
             if (toAdd == null)
                 return "error";
             Battle battle = null;
-            lock (padlock)
+            lock (padlock) //needs to lock as it is critical code about order of operations
             {
                 foreach (Player player in PlayersInMM) //check if already in MM
                 {

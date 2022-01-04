@@ -41,7 +41,7 @@ namespace MTCG.SystemLogicClasses
                     case "/Collection": //just returns own collection
                         return MakeOwnCollection(request.parametres[1]); //parameter 1 is token
                     case "/Trades": //List of all trades that are currently open 
-                        break;
+                        return GetTrades();
                     case "/Pack": //gives Pack info 
                         return ShowPackInfo(info[2]); //?id= info[2]
                     case "/Battle": //Instantly sent by client after entering MM and no imediate battle. Waits for Battle Results
@@ -63,8 +63,8 @@ namespace MTCG.SystemLogicClasses
                         if (request.parametres.Length < 4) //if too few parametres
                             return MakeNullRequest();
                         return LoginPlayer(request.parametres[1], request.parametres[3]); //1=name, 3=pwd
-                    case "/Trade": //if only 1 param it accepts that trade else it makes its own 
-                        break;
+                    case "/Trade": //1=token //if only token either accept trade or cancel if own // 3= card offered, 5 = card wanted 7 = coins wanted;
+                        return ManageTrade(request.parametres);
                     case "/Pack": //Buys Pack 
                         return BuyPack(request.parametres[1], request.parametres[3]); //1=token, 3=packID
                     case "/EnterMM": //Joins MM  //returns more to come or if already 1 inside gets battle results
@@ -76,7 +76,6 @@ namespace MTCG.SystemLogicClasses
                     default:
                         return MakePageNotFound();
                 }
-                return MakePageNotFound(); //remove later
             }
             else
             {
@@ -84,8 +83,75 @@ namespace MTCG.SystemLogicClasses
             }
         }
 
+        private static Response ManageTrade(string[] parametres)
+        {
+            string returntext = "Server Exception";
+            string code = "500 Internal Server Error";
+            string type = "text / html";
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player player = handler.GetPlayerOnline(parametres[1]);
+                
+            int tradeid = 0;
+            if (player == null) //if player not logged in return that
+                return NotLoggedIn();
+            string[] tradeparams = parametres[3].Split(',');
+            if (tradeparams.Length==1) //split
+            {
+                if (!Int32.TryParse(tradeparams[0], out tradeid)) //if invalid tradeID cancel
+                    ResetContentRequest();
+                TradeDAO tdao = new TradeDAOImpl(); //tradedao gets the trade
+                Trade trade = tdao.GetTrade(tradeid); 
+                if(trade==null) //if the trade doesn't exist send error
+                    return MakeNullRequest();
 
+                if(trade.Owner==player.Name) //if trade ownder sent the request Cancel it
+                {
+                    if (tdao.CancelTrade(player, trade.ID))
+                    {
+                        returntext = "Success Trade Canceled";
+                        code = "200 OK";
+                    }
+                } else
+                {
+                    if(tdao.AcceptTrade(player, trade.ID)) //if you can accept the trade
+                    {
+                        returntext = "Trade was a Success";
+                        code = "200 OK";
+                    }else //else say it didn't work
+                    {
+                        returntext = "You can't accept that Trade";
+                        code = "403 Forbidden";
+                    }
+                }
+            } else if(tradeparams.Length==3)  // 1= card offered, 2 = card wanted 3 = coins wanted;
+            {
+                int p0, p1, p2;
+                if (Int32.TryParse(tradeparams[0], out p0) && Int32.TryParse(tradeparams[1], out p1) && Int32.TryParse(tradeparams[2], out p2))
+                {
+                    Trade trade = new Trade(0, player.Name, p0, p1, p2); //creates trade based on parameters
+                    TradeDAO tdao = new TradeDAOImpl(); //tradedao gets the trade
+                    if(tdao.CreateTrade(player,trade)) //if successfully created
+                    {
+                        returntext = JsonConvert.SerializeObject(trade);
+                        code = "200 OK";
+                        type = "application/json";
+                    } else
+                    {
+                        returntext = "You can't create that Trade";
+                        code = "403 Forbidden";
+                    }
+                        
+                }else //if not integers
+                {
+                    ResetContentRequest();
+                }
+            }
 
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response(code, type, d); //any unspecified amount of params
+
+        }
 
 
         //------Good Responses ----------//
@@ -101,7 +167,7 @@ namespace MTCG.SystemLogicClasses
                 return AlreadyQueued();
             if (returntext == "InvalidDeck")
                 code = "403 Forbidden";
-            if (returntext== "Player Successfully entered Queue. Waiting for Opponent...")
+            if (returntext== "Player Successfully entered Queue. Waiting for Opponent...") //starts with and add integer for retrieval back
             {
                 code = "202 Accepted";//Client imediateley sends GET Battle request after
             } //add if 2 queue for instant info
@@ -246,11 +312,19 @@ namespace MTCG.SystemLogicClasses
             return new Response("200 OK", "application/json", d);
         }
 
-
+        private static Response GetTrades()
+        {
+            TradeDAO dao = new TradeDAOImpl();
+            List<Trade> trades = dao.GetAllTrades();
+            string returntext = JsonConvert.SerializeObject(trades, Formatting.Indented);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
 
         //----------ERROR CODES-------------//
 
-            private static Response ResetContentRequest() //205
+        private static Response ResetContentRequest() //205
             {
                 string returntext="Invalid Parametres"; //client would then based on context check if entry too long or invalid password
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();

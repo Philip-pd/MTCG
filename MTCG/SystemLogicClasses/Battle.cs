@@ -29,7 +29,7 @@ namespace MTCG.SystemLogicClasses
             int p1_decksize = 4;
             int p2_decksize = 4;
 
-            p1_deck = DeckSort(_playerList[0].Deck);
+            p1_deck = DeckSort(_playerList[0].Deck); //lock the two
             p2_deck = DeckSort(_playerList[1].Deck);
 
 

@@ -76,7 +76,7 @@ namespace MTCG.SystemLogicClasses
             if(dr.Read())
             {
                 int[] deck = (int[])dr.GetValue(7);
-                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
+                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss, 7-deck
                 return new Player((string)dr[0],(int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6],deck);
             }
             return null;
@@ -97,7 +97,7 @@ namespace MTCG.SystemLogicClasses
             if (dr.Read())
             {
                 int[] deck = (int[])dr.GetValue(7);
-                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss
+                //0-name, 1-pwd, 2-coins, 3-collection, 4-elo, 5-win, 6-loss, 7-deck
                 return new Player((string)dr[0], (int)dr[4], (int)dr[2], (int)dr[3], (int)dr[5], (int)dr[6], deck);
             }
             return null;

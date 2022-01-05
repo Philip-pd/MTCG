@@ -26,7 +26,7 @@ namespace MTCG.SystemLogicClasses
             if (request == null) //if no Request allocated
                 return MakeNullRequest();
 
-            if (request.Type == "GET") 
+            if (request.Type == "GET")
             {
                 String[] info = request.URL.Split('?', '=', '&'); //Get GET Parametres out of URL
                 switch (info[0]) //Look where it wants to go
@@ -46,6 +46,8 @@ namespace MTCG.SystemLogicClasses
                         return ShowPackInfo(info[2]); //?id= info[2]
                     case "/Battle": //Instantly sent by client after entering MM and no imediate battle. Waits for Battle Results
                         break;
+                    case "/Deck": //just user
+                        return HandleDeck(request.parametres[1], null);
                     default:
                         return MakePageNotFound(); //404
                 }
@@ -64,15 +66,33 @@ namespace MTCG.SystemLogicClasses
                             return MakeNullRequest();
                         return LoginPlayer(request.parametres[1], request.parametres[3]); //1=name, 3=pwd
                     case "/Trade": //1=token //if only token either accept trade or cancel if own // 3= card offered, 5 = card wanted 7 = coins wanted;
-                        return ManageTrade(request.parametres);
+                        return ManageTrade(request.parametres, false);
                     case "/Pack": //Buys Pack 
                         return BuyPack(request.parametres[1], request.parametres[3]); //1=token, 3=packID
                     case "/EnterMM": //Joins MM  //returns more to come or if already 1 inside gets battle results
                         return EnterMM(request.parametres[1]);
                     case "/Logout": //Removes from PlayerOnline
                         return LogOutPlayer(request.parametres[1]);
+                    default:
+                        return MakePageNotFound();
+                }
+            }
+            else if (request.Type == "DELETE")
+            {
+                switch (request.URL)
+                {
+                    case "/Trade": //1=token //if only token either accept trade or cancel if own
+                        return ManageTrade(request.parametres, true);
+                    default:
+                        return MakePageNotFound();
+                }
+            }
+            else if (request.Type == "PUT")
+            {
+                switch (request.URL)
+                {
                     case "/Deck": //makes a deck takes 5 params. Token and 4 fields for deck
-                        return UpdateDeck(request.parametres[1], request.parametres[3]); //1=token, 3=cards
+                        return HandleDeck(request.parametres[1], request.parametres[3]); //1=token, 3=cards
                     default:
                         return MakePageNotFound();
                 }
@@ -83,7 +103,8 @@ namespace MTCG.SystemLogicClasses
             }
         }
 
-        private static Response ManageTrade(string[] parametres)
+
+        private static Response ManageTrade(string[] parametres,bool delete)
         {
             string returntext = "Server Exception";
             string code = "500 Internal Server Error";
@@ -104,13 +125,21 @@ namespace MTCG.SystemLogicClasses
                 if(trade==null) //if the trade doesn't exist send error
                     return MakeNullRequest();
 
-                if(trade.Owner==player.Name) //if trade ownder sent the request Cancel it
+                if(trade.Owner==player.Name) //if trade ownder sent the request check if they want to cancel
                 {
-                    if (tdao.CancelTrade(player, trade.ID))
+                    if(delete)
                     {
-                        returntext = "Success Trade Canceled";
-                        code = "200 OK";
+                        if (tdao.CancelTrade(player, trade.ID))
+                        {
+                            returntext = "Success Trade Canceled";
+                            code = "200 OK";
+                        }
+                    } else
+                    {
+                        returntext = "You can't accept your own Trade";
+                        code = "403 Forbidden";
                     }
+                    
                 } else
                 {
                     if(tdao.AcceptTrade(player, trade.ID)) //if you can accept the trade
@@ -198,6 +227,7 @@ namespace MTCG.SystemLogicClasses
             PlayerHandler handler = PlayerHandler.Instance;
             if (!handler.PlayerLogout(token)) //check if Logged in
                 return NotLoggedIn();
+            handler.RemovefromQueue(token);
             string returntext = "Logout Successful";
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
@@ -289,24 +319,30 @@ namespace MTCG.SystemLogicClasses
             return new Response("200 OK", "application/json", d);
         }
 
-        private static Response UpdateDeck(string token, string content)
+        private static Response HandleDeck(string token, string content)
         {
-            string[] deckstrings = content.Split(',');
-            int[] deckints = new int[4];
-            if (deckstrings.Length != 4)
-                return MakeNullRequest();
             PlayerHandler handler = PlayerHandler.Instance;
             Player player = handler.GetPlayerOnline(token);
             if (player == null)
                 return NotLoggedIn();
-            for (int i = 0; i < deckstrings.Length; i++)
+            string returntext;
+            if (content!=null) //return deck instead
             {
-                if (!Int32.TryParse(deckstrings[i], out deckints[i]))
+                string[] deckstrings = content.Split(',');
+                int[] deckints = new int[4];
+                if (deckstrings.Length != 4)
                     return MakeNullRequest();
+            
+                for (int i = 0; i < deckstrings.Length; i++)
+                {
+                    if (!Int32.TryParse(deckstrings[i], out deckints[i]))
+                        return MakeNullRequest();
+                }
+                if (!player.CreateDeck(deckints))
+                    return NotInCollection();
             }
-            if (!player.CreateDeck(deckints))
-                return NotInCollection();
-            string returntext = JsonConvert.SerializeObject(player.Deck);
+
+            returntext = JsonConvert.SerializeObject(player.Deck);
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
             Byte[] d = enc.GetBytes(returntext);
             return new Response("200 OK", "application/json", d);

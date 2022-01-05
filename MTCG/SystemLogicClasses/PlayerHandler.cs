@@ -73,13 +73,6 @@ namespace MTCG.SystemLogicClasses
         {
             lock (padlock)
             {
-                foreach (Player player in PlayersInMM) //in case you are still Queued remove you from queue
-                {
-                    if (player.Token == token)
-                    {
-                        PlayersInMM.Remove(player);
-                    }
-                }
                 foreach (Player player in PlayersOnline) //remove you from list of online Players
                 {
                     if (player.Token == token)
@@ -89,6 +82,22 @@ namespace MTCG.SystemLogicClasses
                     }
                 }
             }
+            return false;
+        }
+        public bool RemovefromQueue(string token)
+        {
+            lock (padlock)
+            {
+                foreach (Player player in PlayersInMM) //in case you are still Queued remove you from queue
+                {
+                    if (player.Token == token)
+                    {
+                        PlayersInMM.Remove(player);
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
         public string PlayerEnterMM(string token) //test this multithreaded

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MTCG.SystemLogicClasses
 {
-    class Trade
+    public class Trade
     {
         public int ID { get; }
         public string Owner { get; }

@@ -3,6 +3,7 @@ using MTCG.SystemLogicClasses;
 using MTCG.GameplayLogicClasses;
 using System.IO;
 using System;
+using System.Collections.Generic;
 
 namespace UnitTests
 {
@@ -90,7 +91,7 @@ namespace UnitTests
             Assert.AreEqual(NSpell.GetName(), "NormalSpell");
         }
         [Test]
-        public void GetsRightWinner() //rework or remove cause it will no longer work
+        public void GetsRightWinner() 
         {
 
 
@@ -103,6 +104,22 @@ namespace UnitTests
             Battle battle = new Battle(a, b); 
             battle.Play();
             Assert.Greater(a.Elo,b.Elo);
+
+        }
+        [Test]
+        public void DrawPossible() //Should never happen like this but done like that to guarantee outcome
+        {
+
+
+            int[] ar0 = { 1, 1, 1, 1 }; //all same card (usually not possible cause fetch from db and gets checked before it is entered there)
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, ar0);
+
+            int[] ar1 = { 1, 1, 1, 1 }; //all same card
+            Player b = new Player("p2", 1000, 20, 1073741823, 0, 0, ar1);
+
+            Battle battle = new Battle(a, b);
+            battle.Play();
+            Assert.AreEqual(a.Elo, b.Elo);
 
         }
         [Test]
@@ -139,6 +156,31 @@ namespace UnitTests
             
 
         }
+
+        [Test]
+        public void PlayerHandlerEnterMMWorks()
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            int[] ar0 = { 15, 16, 17, 21 };
+            Player v = new Player("p6", 1000, 20, 1073741823, 0, 0, ar0); //need new player cause one from last test still persists cause singleton
+            Assert.AreEqual(handler.PlayerLogin(v), true);
+            Assert.AreEqual(handler.PlayerEnterMM("p6-Token"), "Player Successfully entered Queue. Waiting for Opponent...");
+            Assert.AreEqual(handler.GetPlayerMatchmaking("p6-Token"),v);
+            Assert.AreEqual(handler.PlayerLogout("p6-Token"), true);
+            Assert.AreEqual(handler.RemovefromQueue("p6-Token"), true);
+        }
+        [Test]
+        public void PlayerHandlerMMWorks()
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            int[] ar0 = { 1, 1, 1, 1 };
+            Player foo = new Player("p7", 1000, 20, 1073741823, 0, 0, ar0); //need new player cause one from last test still persists cause singleton
+            Player bar = new Player("p8", 1000, 20, 1073741823, 0, 0, ar0);
+            Assert.AreEqual(handler.PlayerLogin(foo), true);
+            Assert.AreEqual(handler.PlayerLogin(bar), true);
+            Assert.AreEqual(handler.PlayerEnterMM("p7-Token"), "Player Successfully entered Queue. Waiting for Opponent...");
+            Assert.AreEqual(handler.PlayerEnterMM("p8-Token"), "Game ended in a Draw");
+        }
         [Test]
         public void PackAddsToCollection()
         {
@@ -167,16 +209,38 @@ namespace UnitTests
             Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(1)),0);
 
         }
-        //test Make Trades
-        //test Test Accept Trades
-        //test can't accept trade if already in posession of card
-        //test Cancel Trade
-        //test sold card but already has so gets some gold instead 
-        //test Enter MM
-        //Test a few Elo Calculations
-        //Test some Database Fetches
-        //Check if I get blocked from adding same user to DB without server Crashing
-        //test PlayerDAO whatever
+        [Test]
+        public void CanCreateTrade()
+        {
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);
+            TradeDAO tdao = new TradeDAOImpl();
+            Trade trade = new Trade(0, "p1", 1, -1, 2);
+            Assert.AreEqual(tdao.CreateTrade(a, trade), true);
+        }
+
+        [Test]
+        public void CanCancelTrade()
+        {
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);
+            TradeDAO tdao = new TradeDAOImpl();
+            Trade trade = new Trade(0, "p1", 1, -1, 2);
+            tdao.CreateTrade(a, trade);
+            List<Trade> trades = tdao.GetAllTrades();
+            Assert.AreEqual(tdao.CancelTrade(a, trades[trades.Count-1].ID), true);
+        }
+
+        [Test]
+        public void CanCancelTradeAndRecieveMoney()
+        {
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);
+            TradeDAO tdao = new TradeDAOImpl();
+            Trade trade = new Trade(0, "p1", 1, -1, 2);
+            tdao.CreateTrade(a, trade);
+            a.Collection[1] = true;
+            List<Trade> trades = tdao.GetAllTrades();
+            tdao.CancelTrade(a, trades[trades.Count - 1].ID);
+            Assert.AreEqual(a.Coins, 21);
+        }
 
     }
 }

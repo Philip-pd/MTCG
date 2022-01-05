@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MTCG.SystemLogicClasses
 {
-    interface TradeDAO
+    public interface TradeDAO
     {
         List<Trade> GetAllTrades();
         bool CreateTrade(Player from,Trade trade);

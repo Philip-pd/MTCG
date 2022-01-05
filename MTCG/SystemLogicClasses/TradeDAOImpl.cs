@@ -7,7 +7,7 @@ using System.Data;
 
 namespace MTCG.SystemLogicClasses
 {
-    class TradeDAOImpl : TradeDAO
+    public class TradeDAOImpl : TradeDAO
     {
         public bool AcceptTrade(Player accepter, int id)
         {

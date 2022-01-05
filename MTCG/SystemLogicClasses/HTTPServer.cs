@@ -58,17 +58,56 @@ namespace MTCG.SystemLogicClasses
             StreamReader reader = new StreamReader(client.GetStream()); //get clients requests
 
             String msg = "";
+            String token = "";
+            String body = "";
+            int contentlength = 0;
             while (reader.Peek() != -1) //checks if there is more
             {
-                msg += reader.ReadLine() + "\n"; //needs to break if there is a body
+                string line = reader.ReadLine();
+                msg += line + "\n"; //needs to break if there is a body
+
+                if (line.StartsWith("Authorization:")) //rename this in all insomnia scripts
+                {
+                    String[] info = line.Split(':',' '); //cause space after :
+                    token = info[2];
+                }
+                if (line.StartsWith("Content-Length:"))
+                {
+                    String[] info = line.Split(':');
+                    contentlength = Int32.Parse(info[1]);
+                    break;
+                }
+            }
+            if(contentlength!=0)
+            {
+                body = ReadHttpBody(reader, contentlength);
             }
             //if body get body with function
-            Debug.WriteLine("Request:\n" + msg); //writes Request so I can see what's going on
+            Debug.WriteLine("Request:\n"+token+" " + msg +" " + body); //writes Request so I can see what's going on
 
-            Request req = Request.GetRequest(msg); //generates request from string //add body as second param here
+            Request req = Request.GetRequest(msg,token,body); //generates request from string //add body as second param here
             Response resp = Response.From(req); //generates response based on request
             resp.Post(client.GetStream()); //returns data to client.
             client.Close(); //closes client
+        }
+
+        protected static string ReadHttpBody(StreamReader streamReader, int contentLength)
+        {
+            StringBuilder contentStringBuilder = new StringBuilder(10000);
+            char[] buffer = new char[1024];
+            int bytesReadTotal = 0;
+            while (bytesReadTotal < contentLength)
+            {
+                int bytesRead = streamReader.Read(buffer, 0, 1024);
+                bytesReadTotal += bytesRead;
+                if (bytesRead == 0)
+                {
+                    break;
+                }
+                contentStringBuilder.Append(buffer, 0, bytesRead);
+            }
+
+            return contentStringBuilder.ToString();
         }
     }
 }

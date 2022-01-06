@@ -230,6 +230,18 @@ namespace UnitTests
         }
 
         [Test]
+        public void CancelTradeReturnstoCollection()
+        {
+            Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);
+            TradeDAO tdao = new TradeDAOImpl();
+            Trade trade = new Trade(0, "p1", 1, -1, 2);
+            tdao.CreateTrade(a, trade);
+            List<Trade> trades = tdao.GetAllTrades();
+            Assert.AreEqual(tdao.CancelTrade(a, trades[trades.Count - 1].ID), true);
+            Assert.AreEqual(a.GetCollectionInt(), 1073741823);
+        }
+
+        [Test]
         public void CanCancelTradeAndRecieveMoney()
         {
             Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);

@@ -31,12 +31,9 @@ namespace MTCG.SystemLogicClasses
                 String[] info = request.URL.Split('?', '=', '&'); //Get GET Parametres out of URL
                 switch (info[0]) //Look where it wants to go
                 {
-                    case "/Demo":
-                        System.Threading.Thread.Sleep(10000); //Just to test multithreadedness.
-                        return MakeNullRequest(); //400
                     case "/Ranking": //List of players based on elo
                         return MakePlayerList();
-                    case "/Player": //?name=name <-- get that also no need to be logged in; 
+                    case "/Player": //?name=name  no need to be logged in; 
                         return ShowPlayerJSON(info[2]); //?name= info[2]
                     case "/Collection": //just returns own collection
                         return MakeOwnCollection(request.parametres[1]); //parameter 1 is token
@@ -45,13 +42,13 @@ namespace MTCG.SystemLogicClasses
                     case "/Pack": //gives Pack info 
                         return ShowPackInfo(info[2]); //?id= info[2]
                     case "/Battle": //Instantly sent by client after entering MM and no imediate battle. Waits for Battle Results
-                        break;
+                        return MakePageNotFound(); //remove later
                     case "/Deck": //just user
                         return HandleDeck(request.parametres[1], null);
                     default:
                         return MakePageNotFound(); //404
                 }
-                return MakePageNotFound(); //remove later
+                
             }
             else if (request.Type == "POST") //POST parametres are in request parametres and URL doesn't need to be edited
             {
@@ -69,7 +66,7 @@ namespace MTCG.SystemLogicClasses
                         return ManageTrade(request.parametres, false);
                     case "/Pack": //Buys Pack 
                         return BuyPack(request.parametres[1], request.parametres[3]); //1=token, 3=packID
-                    case "/EnterMM": //Joins MM  //returns more to come or if already 1 inside gets battle results
+                    case "/EnterMM": //Joins MM  //returns entered MM or if already 1 inside gets battle results
                         return EnterMM(request.parametres[1]);
                     case "/Logout": //Removes from PlayerOnline
                         return LogOutPlayer(request.parametres[1]);
@@ -91,9 +88,9 @@ namespace MTCG.SystemLogicClasses
             {
                 switch (request.URL)
                 {
-                    case "/Deck": //makes a deck takes 5 params. Token and 4 fields for deck
+                    case "/Deck": // Token and 4 fields for deck
                         return HandleDeck(request.parametres[1], request.parametres[3]); //1=token, 3=cards
-                    case "/Pack":
+                    case "/Pack": //put modifies the available packs
                         return CreatePack(request.parametres[1], request.parametres[3]);
                     default:
                         return MakePageNotFound();
@@ -281,7 +278,7 @@ namespace MTCG.SystemLogicClasses
             return new Response("200 OK", "application/json", d);
         }
 
-        private static Response MakePlayer(string name, string pwd) //remove just used for tests
+        private static Response MakePlayer(string name, string pwd) 
         {
             PlayerDAO dao = new PlayerDAOImpl();
             if (name.Length > 32 || pwd.Length > 64 || !dao.AddPlayer(name, pwd))

@@ -72,7 +72,7 @@ namespace MTCG.GameplayLogicClasses
         }
         element GetElement(int id)
         {
-            return (element)(id % this.ElementTypes); //check if enum really doesn't loop
+            return (element)(id % this.ElementTypes);
         }
     }
 }

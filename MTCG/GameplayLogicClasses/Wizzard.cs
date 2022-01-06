@@ -10,7 +10,7 @@ namespace MTCG.GameplayLogicClasses
 
         public override int GetDamage(Card Enemy) //Wizzards fight using spells so Elements also apply here but they only get buffed
         {
-            int bonus = 0;
+            int bonus = 1;
             if (SpecialRulesCheck((MonsterCard)Enemy))
                 bonus = 2;
 
@@ -20,7 +20,7 @@ namespace MTCG.GameplayLogicClasses
                 }
                 else
                 { return this.Damage * bonus; }
-            } 
+        } 
         public override bool SpecialRulesCheck(MonsterCard Enemy)
         {
             if (Enemy.Name == "Troll" || Enemy.Name == "Goblin" || Enemy.Name == "Orc")

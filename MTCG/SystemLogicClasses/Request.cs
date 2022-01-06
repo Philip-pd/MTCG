@@ -44,7 +44,7 @@ namespace MTCG.SystemLogicClasses
                 parametres[0] = "Username:";
                 parametres[1] = bodyparts[4];
                 parametres[2] = "Password:";
-                parametres[3] = bodyparts[9]; //all requests with token only use 1 bodyparts element;
+                parametres[3] = bodyparts[9];
 
                 Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
                 return new Request(type, url, host, parametres); //actually creates the request as we now have all params
@@ -59,7 +59,7 @@ namespace MTCG.SystemLogicClasses
             }
 
         }
-        private static String[] BreakUpBody(string body)
+        private static String[] BreakUpBody(string body) //splits the json manually since we don't know what class it would be yet
         {
             String[] bodyparts = body.Split(':','\"');
 

@@ -69,6 +69,11 @@ namespace MTCG.SystemLogicClasses
         {
             if(!from.Collection[trade.CardOffered]) //lock
                 return false;
+            for(int i=0;i<4;i++) //checks if in deck
+            {
+                if(from.Deck[i]== trade.CardOffered)
+                    return false;
+            }
 
             IDbCommand command = Connect();
             command.CommandText = @"insert into trades(name,Offered,WantsC,WantsM)

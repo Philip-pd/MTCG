@@ -7,7 +7,7 @@ using System.Data;
 
 namespace MTCG.SystemLogicClasses
 {
-    class PlayerDAOImpl : PlayerDAO //Create playerdata class which only has values and doesn't implement actual functions
+    class PlayerDAOImpl : PlayerDAO
     {
         public bool AddPlayer(string name, string pwd) //take all data from the player
         {
@@ -23,7 +23,7 @@ namespace MTCG.SystemLogicClasses
             try
             {
 
-            command.ExecuteNonQuery(); //somehow check if it worked or check prior if exists
+            command.ExecuteNonQuery(); //if didn't work return that
                 return true;
             } catch(NpgsqlException)
             {

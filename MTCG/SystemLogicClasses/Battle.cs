@@ -42,7 +42,7 @@ namespace MTCG.SystemLogicClasses
                 int p1_card = _random.Next(p1_decksize);
                 int p2_card = _random.Next(p2_decksize);
                 switch (Round(p1_deck[p1_card], p2_deck[p2_card]))
-                {//Bewusst nicht ausgelagert da zwar übersichtlicher aber komplizierter und es nur 3 fälle geben kann
+                {//deliberateley done in here to assure readability
                     case 'a': //player 1 wins
                         p1_deck[7] = p2_deck[p2_card];
                         p2_deck[p2_card] = 0;
@@ -65,15 +65,15 @@ namespace MTCG.SystemLogicClasses
                     default:
                         throw new ArgumentException("Fatal Error in Round Logic. Invalid Argument Returned");
                 }
-                Console.WriteLine($"{_playerList[0].Name} {p1_decksize} | {_playerList[1].Name} {p2_decksize}");
-                if (p1_decksize == 8)
+                Console.WriteLine($"{_playerList[0].Name} {p1_decksize} | {_playerList[1].Name} {p2_decksize}"); //Status update after each non draw round
+                if (p1_decksize == 8) //player 1 won
                 {
                     Console.WriteLine($"{_playerList[0].Name} was victorious");
                     _playerList[0].UpdateElo(_playerList[1].Elo, 'a');
                     _playerList[1].UpdateElo(_playerList[0].Elo, 'b');
                     return $"{_playerList[0].Name} was victorious";
                 }
-                if (p2_decksize == 8)
+                if (p2_decksize == 8) //player 2 won
                 {
                     Console.WriteLine($"{_playerList[1].Name} was victorious");
                     _playerList[0].UpdateElo(_playerList[1].Elo, 'b');
@@ -86,7 +86,7 @@ namespace MTCG.SystemLogicClasses
             _playerList[1].UpdateElo(_playerList[0].Elo, 'c');
             return "Game ended in a Draw";
         }
-        private char Round(int A, int B) //can't mark defeated cards cause out of scope
+        private char Round(int A, int B) //Cards get generated here
         {
             Card cardA = factory.GenerateCard(A);
             Card cardB = factory.GenerateCard(B);
@@ -109,7 +109,7 @@ namespace MTCG.SystemLogicClasses
 
             
         }
-        private int[] DeckSort(int[] arr1) //Array has Var Length
+        private int[] DeckSort(int[] arr1) //Puts card to front of deck so no empty spaces
         {
             int[] deck = new int[8];
             int spot = 0;

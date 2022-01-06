@@ -8,7 +8,7 @@ namespace MTCG.SystemLogicClasses
     {
         private static PlayerHandler instance = null;
         private static readonly object padlock = new object();
-        public List<Player> PlayersOnline = new List<Player>(); //might be a problem if I just keep creating them //could add logout and then write in specs that if actually implemented remove players after certain inactivity time
+        public List<Player> PlayersOnline = new List<Player>(); 
         public List<Player> PlayersInMM = new List<Player>();
 
         PlayerHandler()

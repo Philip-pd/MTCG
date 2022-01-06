@@ -14,7 +14,7 @@ namespace MTCG.SystemLogicClasses
         public string Token { get; }
         public int Elo { get; set; }
         public int Coins { get; set; }
-        public int[] Deck { get; set; } = new int[4]; //Deck is not tracked by server and needs to be set before playing
+        public int[] Deck { get; set; } = new int[4]; 
         [JsonIgnore]
         public bool[] Collection { get; set; } = new bool[32]; //set to currently available cards (only need 30 but no int with 30 bit) 
         public int Wins { get; set; }
@@ -24,8 +24,8 @@ namespace MTCG.SystemLogicClasses
         public Player(string name,int elo,int coins,int collection,int wins,int losses,int[] deck)
         {
             this.Name = name;
-            this.Token = name + "-Token"; //you don't need a password here cause you should never have it outside of DB
-            this.Elo = elo; //1000 default
+            this.Token = name + "-Token"; 
+            this.Elo = elo;
             this.Coins = coins;          
             this.Wins = wins;
             this.Losses = losses;
@@ -89,7 +89,7 @@ namespace MTCG.SystemLogicClasses
         }
 
 
-        public string ReturnCollection() //have this included every time you buy packs or do trades
+        public string ReturnCollection() 
         {
             return JsonConvert.SerializeObject(this.Collection);
         }
@@ -115,8 +115,8 @@ namespace MTCG.SystemLogicClasses
 
         private bool ValidateDeck(int[] ar) //call whenever make new Deck
         {
-            int[] prev = new int[4]; //only needs to check first 3 but saves headache
-            for (int i = 0; i < 4; i++) //works //should check for doubles
+            int[] prev = new int[4]; //only needs to check first 3 
+            for (int i = 0; i < 4; i++) //works 
             {
                 try
                 {
@@ -148,11 +148,11 @@ namespace MTCG.SystemLogicClasses
                 switch(outcome)
                 {
                     case 'a':
-                        this.Elo +=25;
+                        this.Elo +=3;
                         this.Wins++;
                         break;
                     case 'b':
-                        this.Elo -= 25;
+                        this.Elo -= 5;
                         this.Losses++;
                         break;
                     case 'c':
@@ -165,16 +165,5 @@ namespace MTCG.SystemLogicClasses
 
             return;
         }
-
-        /*
-         * 
-         * Can:
-         * 
-         * Open Packs N
-         * Trade N
-         * Make Friends (only in DB) ?
-         * Battle Y
-         */
-
     }
 }

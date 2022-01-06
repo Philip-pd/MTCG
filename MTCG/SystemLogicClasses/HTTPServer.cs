@@ -12,8 +12,6 @@ namespace MTCG.SystemLogicClasses
 {
     public class HTTPServer
     {
-        public const string MSG_DIR = "/root/msg/"; //probs remove later for now just here
-        public const string WEB_DIR = "/root/web/";
         public const string VERSION = "HTTP/1.1";
         public const string NAME = "MTCG-Server Test";
 
@@ -64,14 +62,14 @@ namespace MTCG.SystemLogicClasses
             while (reader.Peek() != -1) //checks if there is more
             {
                 string line = reader.ReadLine();
-                msg += line + "\n"; //needs to break if there is a body
+                msg += line + "\n"; 
 
-                if (line.StartsWith("Authorization:")) //rename this in all insomnia scripts
+                if (line.StartsWith("Authorization:")) 
                 {
                     String[] info = line.Split(':',' '); //cause space after :
                     token = info[2];
                 }
-                if (line.StartsWith("Content-Length:"))
+                if (line.StartsWith("Content-Length:")) //needs to break if there is a body
                 {
                     String[] info = line.Split(':');
                     contentlength = Int32.Parse(info[1]);

@@ -187,7 +187,7 @@ namespace UnitTests
 
             Player a = new Player("p1", 1000, 20, 0, 0, 0, null); 
             BoosterPack pack = new BoosterPack();
-            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(0)), 5);
+            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(1)), 5);
             Assert.AreEqual(a.GetCollectionInt(), 31);
         }
         [Test]
@@ -195,9 +195,9 @@ namespace UnitTests
         {
 
             Player a = new Player("p1", 1000, 20, 0, 0, 0, null); BoosterPack pack = new BoosterPack();
-            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(1)), 5);
+            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(2)), 5);
             Assert.AreEqual(a.GetCollectionInt(), 992);
-            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(6)), 4);
+            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(7)), 4);
             Assert.AreEqual(a.GetCollectionInt(), 34637792);
             Assert.AreEqual(a.Coins, 11);
         }
@@ -206,7 +206,7 @@ namespace UnitTests
         {
             Player a = new Player("p1", 1000, 20, 1073741823, 0, 0, null);
             BoosterPack pack = new BoosterPack();
-            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(1)),0);
+            Assert.AreEqual(a.AddBoosterToCollection(pack.GetPack(2)),0);
 
         }
         [Test]

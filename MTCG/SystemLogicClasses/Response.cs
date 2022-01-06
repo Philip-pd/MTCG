@@ -93,6 +93,8 @@ namespace MTCG.SystemLogicClasses
                 {
                     case "/Deck": //makes a deck takes 5 params. Token and 4 fields for deck
                         return HandleDeck(request.parametres[1], request.parametres[3]); //1=token, 3=cards
+                    case "/Pack":
+                        return CreatePack(request.parametres[1], request.parametres[3]);
                     default:
                         return MakePageNotFound();
                 }
@@ -103,6 +105,39 @@ namespace MTCG.SystemLogicClasses
             }
         }
 
+        private static Response CreatePack(string token, string content)
+        {
+            if (token != "admin-Token")
+                return NoPermission();
+            PlayerHandler handler = PlayerHandler.Instance;
+            Player player = handler.GetPlayerOnline(token);
+            if (player == null)
+                return NotLoggedIn();
+            string returntext;
+            int[] packcontent = new int[5];
+            if (content != null) //return deck instead
+            {
+                string[] cardstrings = content.Split(',');
+                
+                if (cardstrings.Length != 5)
+                    return MakeNullRequest();
+
+                for (int i = 0; i < cardstrings.Length; i++)
+                {
+                    if (!Int32.TryParse(cardstrings[i], out packcontent[i]))
+                        return MakeNullRequest();
+                }
+                BoosterPack pack = new BoosterPack();
+                if(!pack.EnterPacktoDB(packcontent))
+                    return MakeNullRequest();
+
+            }
+
+            returntext = JsonConvert.SerializeObject(packcontent);
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            Byte[] d = enc.GetBytes(returntext);
+            return new Response("200 OK", "application/json", d);
+        }
 
         private static Response ManageTrade(string[] parametres,bool delete)
         {
@@ -291,7 +326,7 @@ namespace MTCG.SystemLogicClasses
         private static Response ShowPackInfo(string packID)
         {
             int pack = 0;
-            if (!Int32.TryParse(packID, out pack) || pack < 0 || pack > 10) //check if pack exists
+            if (!Int32.TryParse(packID, out pack)) //check if pack functions
                 return MakeNullRequest();
             BoosterPack booster = new BoosterPack();
             string returntext = JsonConvert.SerializeObject(booster.GetPack(pack));
@@ -308,10 +343,12 @@ namespace MTCG.SystemLogicClasses
                 return NotLoggedIn();
             if (player.Coins < 5)
                 return InsufficientFunds();
-            if (!Int32.TryParse(packID, out pack) || pack < 0 || pack > 10) //check if pack exists
+            if (!Int32.TryParse(packID, out pack)) //check if pack exists
                 return MakeNullRequest();
             BoosterPack booster = new BoosterPack();
             int[] newCards = booster.GetPack(pack);
+            if(newCards==null)
+                return MakeNullRequest();
             int added = player.AddBoosterToCollection(newCards);
             string returntext = $"{{\r\"NewCardsAdded\": { added},\r\"CoinsRefunded\": {5 - added},\"Collection\":\r{player.ReturnCollection()}}}";
             System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
@@ -384,7 +421,15 @@ namespace MTCG.SystemLogicClasses
                 return new Response("403 Forbidden", "text/html", d);
             }
 
-            private static Response NotInCollection() //403
+            private static Response NoPermission() //403
+            {
+                string returntext = "No Permission";
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] d = enc.GetBytes(returntext);
+                return new Response("403 Forbidden", "text/html", d);
+            }
+
+        private static Response NotInCollection() //403
             {
                 string returntext = "Error: One or More Cards You selected aren't part of your collection";
                 System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();

@@ -37,7 +37,6 @@ namespace MTCG.SystemLogicClasses
                 parametres[2] = "body:";
                 parametres[3] = bodyparts[4]; //all requests with token only use 1 bodyparts element;
 
-                Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
                 return new Request(type, url, host, parametres); //actually creates the request as we now have all params
             }else if(String.IsNullOrEmpty(token) && bodyparts.Length >= 9) //request without token but with body params //basically only signup
             {
@@ -46,7 +45,6 @@ namespace MTCG.SystemLogicClasses
                 parametres[2] = "Password:";
                 parametres[3] = bodyparts[9];
 
-                Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
                 return new Request(type, url, host, parametres); //actually creates the request as we now have all params
             }
             else  //Request with either no body or neither body nor token. Can still write empty string to param 1
@@ -54,7 +52,6 @@ namespace MTCG.SystemLogicClasses
                 parametres[0] = "Auth:";
                 parametres[1] = token;
 
-                Console.WriteLine(String.Format("{0} {1} @ {2}", type, url, host));
                 return new Request(type, url, host, parametres); //actually creates the request as we now have all params
             }
 

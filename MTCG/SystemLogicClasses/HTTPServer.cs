@@ -81,8 +81,7 @@ namespace MTCG.SystemLogicClasses
                 body = ReadHttpBody(reader, contentlength);
             }
             //if body get body with function
-            Debug.WriteLine("Request:\n"+token+" " + msg +" " + body); //writes Request so I can see what's going on
-
+            
             Request req = Request.GetRequest(msg,token,body); //generates request from string //add body as second param here
             Response resp = Response.From(req); //generates response based on request
             resp.Post(client.GetStream()); //returns data to client.

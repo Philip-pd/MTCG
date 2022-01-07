@@ -65,7 +65,7 @@ namespace UnitTests
             Assert.AreEqual(a.Deck[0], 0);
         }
         [Test]
-        public void FactoryTestMonsters()
+        public void FactoryTestMonsters_Goblins()
         {
             CardFactory cardFactory = new CardFactory();
             Card WGoblin = cardFactory.GenerateCard(0);
@@ -75,10 +75,117 @@ namespace UnitTests
             Card NGoblin = cardFactory.GenerateCard(2);
             Assert.AreEqual(NGoblin.GetName(), "NormalGoblin");
             Card WDragon = cardFactory.GenerateCard(3);
-            Assert.AreEqual(WDragon.GetName(), "WaterDragon");
             Assert.AreEqual(FGoblin.GetDamage(WDragon), 0);
 
         }
+        [Test]
+        public void FactoryTestMonsters_Dragons()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WDragon = cardFactory.GenerateCard(3);
+            Assert.AreEqual(WDragon.GetName(), "WaterDragon");
+            Card FDragon = cardFactory.GenerateCard(4);
+            Assert.AreEqual(FDragon.GetName(), "FireDragon");
+            Card NDragon = cardFactory.GenerateCard(5);
+            Assert.AreEqual(NDragon.GetName(), "NormalDragon");
+            Card FElf = cardFactory.GenerateCard(19);
+            Assert.AreEqual(FDragon.GetDamage(FElf), 0);
+
+        }
+        [Test]
+        public void FactoryTestMonsters_Wizzards()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WWizzard = cardFactory.GenerateCard(6);
+            Assert.AreEqual(WWizzard.GetName(), "WaterWizzard");
+            Card FWizzard = cardFactory.GenerateCard(7);
+            Assert.AreEqual(FWizzard.GetName(), "FireWizzard");
+            Card NWizzard = cardFactory.GenerateCard(8);
+            Assert.AreEqual(NWizzard.GetName(), "NormalWizzard");
+            Card FGoblin = cardFactory.GenerateCard(1);
+            Assert.AreEqual(WWizzard.GetDamage(FGoblin), 44);
+
+        }
+        [Test]
+        public void FactoryTestMonsters_Orcs()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WOrc = cardFactory.GenerateCard(9);
+            Assert.AreEqual(WOrc.GetName(), "WaterOrc");
+            Card FOrc = cardFactory.GenerateCard(10);
+            Assert.AreEqual(FOrc.GetName(), "FireOrc");
+            Card NOrc = cardFactory.GenerateCard(11);
+            Assert.AreEqual(NOrc.GetName(), "NormalOrc");
+            Card NWizzard = cardFactory.GenerateCard(8); ;
+            Assert.AreEqual(WOrc.GetDamage(NWizzard), 0);
+
+        }
+        [Test]
+        public void FactoryTestMonsters_Knights()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WKnight = cardFactory.GenerateCard(12);
+            Assert.AreEqual(WKnight.GetName(), "WaterKnight");
+            Card FKnight = cardFactory.GenerateCard(13);
+            Assert.AreEqual(FKnight.GetName(), "FireKnight");
+            Card NKnight = cardFactory.GenerateCard(14);
+            Assert.AreEqual(NKnight.GetName(), "NormalKnight");
+            Assert.AreEqual(WKnight.GetDamage(NKnight), 25);//knights have no special rules
+        }
+        [Test]
+        public void FactoryTestMonsters_Kraken()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WKraken = cardFactory.GenerateCard(15);
+            Assert.AreEqual(WKraken.GetName(), "WaterKraken");
+            Card FKraken = cardFactory.GenerateCard(16);
+            Assert.AreEqual(FKraken.GetName(), "FireKraken");
+            Card NKraken = cardFactory.GenerateCard(17);
+            Assert.AreEqual(NKraken.GetName(), "NormalKraken");
+            Card WSpell = cardFactory.GenerateCard(27);
+            Assert.AreEqual(WKraken.GetDamage(WSpell), 999);//Kraken VS Spell
+            Assert.AreEqual(WKraken.GetDamage(FKraken), 0);//Kraken VS Fire
+        }
+
+        [Test]
+        public void FactoryTestMonsters_Elf()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WElf = cardFactory.GenerateCard(18);
+            Assert.AreEqual(WElf.GetName(), "WaterElf");
+            Card FElf = cardFactory.GenerateCard(19);
+            Assert.AreEqual(FElf.GetName(), "FireElf");
+            Card NElf = cardFactory.GenerateCard(20);
+            Assert.AreEqual(NElf.GetName(), "NormalElf");
+            Assert.AreEqual(WElf.GetDamage(FElf), 24);//No Special cases
+        }
+        [Test]
+        public void FactoryTestMonsters_Troll()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WTroll = cardFactory.GenerateCard(21);
+            Assert.AreEqual(WTroll.GetName(), "WaterTroll");
+            Card FTroll = cardFactory.GenerateCard(22);
+            Assert.AreEqual(FTroll.GetName(), "FireTroll");
+            Card NTroll = cardFactory.GenerateCard(23);
+            Assert.AreEqual(NTroll.GetName(), "NormalTroll");
+            Assert.AreEqual(WTroll.GetDamage(FTroll), 30);//No Special cases
+        }
+
+        [Test]
+        public void FactoryTestMonsters_Duck()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WDuck = cardFactory.GenerateCard(24);
+            Assert.AreEqual(WDuck.GetName(), "WaterDuck");
+            Card FDuck = cardFactory.GenerateCard(25);
+            Assert.AreEqual(FDuck.GetName(), "FireDuck");
+            Card NDuck = cardFactory.GenerateCard(26);
+            Assert.AreEqual(NDuck.GetName(), "NormalDuck");
+            Card NKnight = cardFactory.GenerateCard(14);
+            Assert.AreEqual(WDuck.GetDamage(NKnight), 50);
+        }
+
         [Test]
         public void FactoryTestSpells()
         {
@@ -89,6 +196,24 @@ namespace UnitTests
             Assert.AreEqual(WSpell.GetName(), "WaterSpell");
             Assert.AreEqual(FSpell.GetName(), "FireSpell");
             Assert.AreEqual(NSpell.GetName(), "NormalSpell");
+        }
+        [Test]
+        public void TestSpellToSpell()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WSpell = cardFactory.GenerateCard(27);
+            Card FSpell = cardFactory.GenerateCard(28);
+            Assert.AreEqual(WSpell.GetDamage(FSpell), 40);
+            Assert.AreEqual(FSpell.GetDamage(WSpell), 10);
+        }
+        [Test]
+        public void TestSpellToMonster()
+        {
+            CardFactory cardFactory = new CardFactory();
+            Card WSpell = cardFactory.GenerateCard(27);
+            Card FGoblin = cardFactory.GenerateCard(1);
+            Assert.AreEqual(WSpell.GetDamage(FGoblin), 40);
+            Assert.AreEqual(FGoblin.GetDamage(WSpell), 10);
         }
         [Test]
         public void GetsRightWinner() 
@@ -180,6 +305,15 @@ namespace UnitTests
             Assert.AreEqual(handler.PlayerLogin(bar), true);
             Assert.AreEqual(handler.PlayerEnterMM("p7-Token"), "Player Successfully entered Queue. Waiting for Opponent...");
             Assert.AreEqual(handler.PlayerEnterMM("p8-Token"), "Game ended in a Draw");
+        }
+        [Test]
+        public void PlayerHandlerMMBlockWorks()
+        {
+            PlayerHandler handler = PlayerHandler.Instance;
+            int[] ar0 = { -1, 1, 1, 1 };
+            Player invalid = new Player("p9", 1000, 20, 1073741823, 0, 0, ar0); //need new player cause one from last test still persists cause singleton
+            Assert.AreEqual(handler.PlayerLogin(invalid), true); //These Checks are here to see if it broke cause I messed up singleton or because actual test is broken
+            Assert.AreEqual(handler.PlayerEnterMM("p9-Token"), "InvalidDeck");
         }
         [Test]
         public void PackAddsToCollection()

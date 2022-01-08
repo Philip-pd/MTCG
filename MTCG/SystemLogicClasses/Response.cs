@@ -41,8 +41,6 @@ namespace MTCG.SystemLogicClasses
                         return GetTrades();
                     case "/Pack": //gives Pack info 
                         return ShowPackInfo(info[2]); //?id= info[2]
-                    case "/Battle": //Instantly sent by client after entering MM and no imediate battle. Waits for Battle Results
-                        return MakePageNotFound(); //remove later
                     case "/Deck": //just user
                         return HandleDeck(request.parametres[1], null);
                     default:

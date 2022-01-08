@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MTCG.GameplayLogicClasses.Card">
+    <Position X="10" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAgAAAAAAAgAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>GameplayLogicClasses\Card.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.CardFactory">
+    <Position X="5.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAgAAAAIAAA=</HashCode>
+      <FileName>GameplayLogicClasses\CardFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Dragon" Collapsed="true">
+    <Position X="8.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Dragon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Duck" Collapsed="true">
+    <Position X="4.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Duck.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Elf" Collapsed="true">
+    <Position X="7.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Elf.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Goblin" Collapsed="true">
+    <Position X="10.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Goblin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Knight" Collapsed="true">
+    <Position X="12.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Knight.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Kraken" Collapsed="true">
+    <Position X="5.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Kraken.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.MonsterCard" Collapsed="true">
+    <Position X="8.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAACAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>GameplayLogicClasses\MonsterCard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Orc" Collapsed="true">
+    <Position X="11.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Orc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.SpellCard" Collapsed="true">
+    <Position X="11.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>GameplayLogicClasses\SpellCard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Troll" Collapsed="true">
+    <Position X="6.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Troll.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MTCG.GameplayLogicClasses.Wizzard" Collapsed="true">
+    <Position X="9.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Wizzard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="MTCG.GameplayLogicClasses.element" Collapsed="true">
+    <Position X="12" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameplayLogicClasses\Card.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MTCG.GameplayLogicClasses.cardname" Collapsed="true">
+    <Position X="12" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAABgAAAEAAAAAIAAAgAAAIABAgAAA=</HashCode>
+      <FileName>GameplayLogicClasses\CardFactory.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
